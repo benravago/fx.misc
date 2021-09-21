@@ -1,13 +1,11 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import fx.react.util.AccumulatorSize;
 
@@ -15,15 +13,15 @@ class AccumulativeEventStreamTest {
 
   @Test
   void test() {
-    EventSource<Integer> source = new EventSource<>();
-    SuspendableEventStream<Integer> suspendable = source.accumulative(() -> new LinkedList<Integer>(), (l, i) -> {
-      l.addLast(i);
-      return l;
-    }, l -> AccumulatorSize.fromInt(l.size()), l -> l.getFirst(), l -> {
-      l.removeFirst();
-      return l;
-    });
-    List<Integer> emitted = new ArrayList<>();
+    var source = new EventSource<Integer>();
+    var suspendable = source.accumulative(
+      () -> new LinkedList<Integer>(),
+      (l, i) -> { l.addLast(i); return l; },
+      l -> AccumulatorSize.fromInt(l.size()),
+      l -> l.getFirst(),
+      l -> { l.removeFirst(); return l; }
+    );
+    var emitted = new ArrayList<Integer>();
     suspendable.subscribe(emitted::add);
 
     source.push(1);

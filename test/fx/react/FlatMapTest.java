@@ -1,31 +1,29 @@
 package fx.react;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 class FlatMapTest {
 
   @Test
   void test() {
-    EventSource<Integer> source = new EventSource<>();
-    EventSource<String> a = new EventSource<>();
-    EventSource<String> b = new EventSource<>();
+    var source = new EventSource<Integer>();
+    var a = new EventSource<String>();
+    var b = new EventSource<String>();
 
-    EventStream<String> stream = source.flatMap(i -> i == 1 ? a : b);
+    var stream = source.flatMap(i -> i == 1 ? a : b);
 
-    List<String> emitted = new ArrayList<>();
+    var emitted = new ArrayList<String>();
     stream = stream.hook(s -> emitted.add(s));
 
     source.push(1);
     a.push("a");
     assertEquals(0, emitted.size()); // not yet subscribed
 
-    Subscription pin = stream.pin();
+    var pin = stream.pin();
     source.push(1);
     a.push("a");
     assertEquals(Arrays.asList("a"), emitted);

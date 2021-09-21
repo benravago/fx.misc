@@ -1,18 +1,18 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
 class DistinctStreamTest {
+  
   <T> void testDistinct(List<T> input, List<T> expectedOutput) {
-    EventSource<T> source = new EventSource<>();
-    EventStream<T> distinct = new DistinctStream<>(source);
-    List<T> distinctCollector = new ArrayList<>();
+    var source = new EventSource<T>();
+    var distinct = new DistinctStream<>(source);
+    var distinctCollector = new ArrayList<>();
     distinct.subscribe(distinctCollector::add);
     input.forEach(source::push);
     assertEquals(expectedOutput, distinctCollector);
@@ -27,4 +27,5 @@ class DistinctStreamTest {
   void testStreamWithNulls() {
     testDistinct(Arrays.asList(null, null, 1, null, null), Arrays.asList(null, 1, null));
   }
+
 }

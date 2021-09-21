@@ -1,26 +1,21 @@
 package fx.react.value;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import fx.react.Counter;
-import fx.react.Subscription;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+
+import fx.Counter;
 
 class OrElseTest {
 
   @Test
   void testCorrectness() {
-    StringProperty s1 = new SimpleStringProperty("a");
-    StringProperty s2 = new SimpleStringProperty("b");
-    StringProperty s3 = new SimpleStringProperty("c");
+    var s1 = new SimpleStringProperty("a");
+    var s2 = new SimpleStringProperty("b");
+    var s3 = new SimpleStringProperty("c");
 
-    Val<String> firstNonNull = Val.orElse(s1, s2).orElse(s3);
+    var firstNonNull = Val.orElse(s1, s2).orElse(s3);
     assertEquals("a", firstNonNull.getValue());
 
     s2.set(null);
@@ -39,13 +34,13 @@ class OrElseTest {
 
   @Test
   void testInvalidationEfficiency() {
-    StringProperty s1 = new SimpleStringProperty("a");
-    StringProperty s2 = new SimpleStringProperty("b");
-    StringProperty s3 = new SimpleStringProperty("c");
+    var s1 = new SimpleStringProperty("a");
+    var s2 = new SimpleStringProperty("b");
+    var s3 = new SimpleStringProperty("c");
 
-    Val<String> firstNonNull = Val.orElse(s1, s2).orElse(s3);
+    var firstNonNull = Val.orElse(s1, s2).orElse(s3);
 
-    Counter invalidationCounter = new Counter();
+    var invalidationCounter = new Counter();
     firstNonNull.addListener(obs -> invalidationCounter.inc());
 
     assertEquals(0, invalidationCounter.get());
@@ -65,17 +60,17 @@ class OrElseTest {
 
   @Test
   void testLaziness() {
-    SimpleVar<String> s1 = (SimpleVar<String>) Var.newSimpleVar("a");
-    SimpleVar<String> s2 = (SimpleVar<String>) Var.newSimpleVar("b");
-    SimpleVar<String> s3 = (SimpleVar<String>) Var.newSimpleVar("c");
+    var s1 = (SimpleVar<String>) Var.newSimpleVar("a");
+    var s2 = (SimpleVar<String>) Var.newSimpleVar("b");
+    var s3 = (SimpleVar<String>) Var.newSimpleVar("c");
 
-    Val<String> firstNonNull = Val.orElse(s1, s2).orElse(s3);
+    var firstNonNull = Val.orElse(s1, s2).orElse(s3);
 
     assertFalse(s1.isObservingInputs());
     assertFalse(s2.isObservingInputs());
     assertFalse(s2.isObservingInputs());
 
-    Subscription sub = firstNonNull.pin();
+    var sub = firstNonNull.pin();
 
     assertTrue(s1.isObservingInputs());
     assertTrue(s2.isObservingInputs());
@@ -87,4 +82,5 @@ class OrElseTest {
     assertFalse(s2.isObservingInputs());
     assertFalse(s2.isObservingInputs());
   }
+
 }

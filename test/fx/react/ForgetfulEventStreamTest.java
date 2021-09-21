@@ -1,20 +1,18 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 class ForgetfulEventStreamTest {
 
   @Test
   void test() {
-    EventSource<Integer> source = new EventSource<>();
-    SuspendableEventStream<Integer> suspendable = source.forgetful();
-    List<Integer> emitted = new ArrayList<>();
+    var source = new EventSource<Integer>();
+    var suspendable = source.forgetful();
+    var emitted = new ArrayList<Integer>();
     suspendable.subscribe(emitted::add);
 
     source.push(1);
@@ -29,12 +27,12 @@ class ForgetfulEventStreamTest {
 
   @Test
   void testResetOnUnsubscribe() {
-    EventSource<Integer> source = new EventSource<>();
-    SuspendableEventStream<Integer> suspendable = source.forgetful();
-    List<Integer> emitted = new ArrayList<>();
-    Subscription sub = suspendable.subscribe(emitted::add);
+    var source = new EventSource<Integer>();
+    var suspendable = source.forgetful();
+    var emitted = new ArrayList<>();
+    var sub = suspendable.subscribe(emitted::add);
 
-    Guard suspension = suspendable.suspend();
+    var suspension = suspendable.suspend();
     source.push(1);
     source.push(2);
     assertEquals(Arrays.asList(), emitted);
@@ -44,4 +42,5 @@ class ForgetfulEventStreamTest {
     suspension.close();
     assertEquals(Arrays.asList(), emitted);
   }
+
 }

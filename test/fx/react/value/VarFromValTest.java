@@ -1,27 +1,24 @@
 package fx.react.value;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import javafx.beans.property.SimpleIntegerProperty;
 
 import fx.react.EventStreams;
-import javafx.beans.binding.IntegerBinding;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 
 class VarFromValTest {
 
   @Test
   void test() {
-    IntegerProperty src = new SimpleIntegerProperty(0);
-    IntegerBinding twice = src.multiply(2);
-    Var<Number> twiceVar = Var.fromVal(twice, n -> src.set(n.intValue() / 2));
+    var src = new SimpleIntegerProperty(0);
+    var twice = src.multiply(2);
+    var twiceVar = Var.fromVal(twice, n -> src.set(n.intValue() / 2));
 
-    List<Number> values = new ArrayList<>();
+    var values = new ArrayList<Number>();
     EventStreams.valuesOf(twiceVar).subscribe(values::add);
 
     src.set(1);

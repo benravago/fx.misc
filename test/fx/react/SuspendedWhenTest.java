@@ -1,15 +1,12 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -17,11 +14,11 @@ class SuspendedWhenTest {
 
   @Test
   void test() {
-    Property<Integer> p = new SimpleObjectProperty<>(0);
-    BooleanProperty suspended = new SimpleBooleanProperty(true);
-    List<Integer> emitted = new ArrayList<>();
-    SuspendableEventStream<Integer> pausable = EventStreams.valuesOf(p).pausable();
-    Subscription sub = pausable.suspendedWhen(suspended).subscribe(emitted::add);
+    var p = new SimpleObjectProperty<>(0);
+    var suspended = new SimpleBooleanProperty(true);
+    var emitted = new ArrayList<Integer>();
+    var pausable = EventStreams.valuesOf(p).pausable();
+    var sub = pausable.suspendedWhen(suspended).subscribe(emitted::add);
 
     // test that the stream started suspended
     assertEquals(Arrays.asList(), emitted);

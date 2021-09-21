@@ -1,24 +1,23 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import fx.react.value.Var;
+import fx.Counter;
 
 class DefaultEventStreamTest {
 
   @Test
   void test() {
-    EventCounter countsTwice = new EventCounter();
-    EventCounter countsOnce = new EventCounter();
+    var countsTwice = new Counter();
+    var countsOnce = new Counter();
 
-    EventSource<Boolean> source = new EventSource<>();
-    EventStream<Boolean> stream = source.withDefaultEvent(true);
+    var source = new EventSource<Boolean>();
+    var stream = source.withDefaultEvent(true);
 
     stream.subscribe(countsTwice::accept);
     source.push(false);
@@ -30,10 +29,10 @@ class DefaultEventStreamTest {
 
   @Test
   void testAutoEmittingStream() {
-    List<Integer> emitted = new ArrayList<>();
+    var emitted = new ArrayList<Integer>();
 
-    Var<Integer> source = Var.newSimpleVar(1);
-    EventStream<Integer> stream = source.values().withDefaultEvent(0);
+    var source = Var.newSimpleVar(1);
+    var stream = source.values().withDefaultEvent(0);
 
     stream.subscribe(emitted::add);
 
@@ -43,4 +42,5 @@ class DefaultEventStreamTest {
 
     assertEquals(Arrays.asList(1, 2), emitted);
   }
+
 }

@@ -1,44 +1,41 @@
 package fx.util.tree;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Random;
-
-import org.junit.jupiter.api.Test;
 
 class FingerTreeTest {
 
   /**
    * Returns a random int, with higher probability for larger numbers.
    */
-  private static int progressiveInt(Random rnd, int bound) {
-    double d = rnd.nextDouble();
+  static int progressiveInt(Random rnd, int bound) {
+    var d = rnd.nextDouble();
     d = d * d * d;
-    int i = (int) Math.floor(d * bound);
+    var i = (int) Math.floor(d * bound);
     return bound - 1 - i;
   }
 
   @Test
   void testSubList() {
-    final int n = 50000;
+    final int n = 50_000;
 
-    Integer[] arr = new Integer[n];
-    for (int i = 0; i < n; ++i)
+    var arr = new Integer[n];
+    for (int i = 0; i < n; ++i) {
       arr[i] = i;
-
-    List<Integer> list = Arrays.asList(arr);
-    List<Integer> treeList = FingerTree.mkTree(list).asList();
+    }
+    var list = Arrays.asList(arr);
+    var treeList = FingerTree.mkTree(list).asList();
     assertEquals(list, treeList);
 
-    Random rnd = new Random(12345);
+    var rnd = new Random(12345);
     while (list.size() > 0) {
-      int len = progressiveInt(rnd, list.size() + 1);
-      int offset = rnd.nextInt(list.size() - len + 1);
+      var len = progressiveInt(rnd, list.size() + 1);
+      var offset = rnd.nextInt(list.size() - len + 1);
       list = list.subList(offset, offset + len);
       treeList = treeList.subList(offset, offset + len);
       assertEquals(list, treeList);
@@ -47,30 +44,32 @@ class FingerTreeTest {
 
   @Test
   void testIteration() {
-    final int n = 50000;
-    final int from = 10000;
-    final int to = 40000;
+    final int n = 50_000;
+    final int from = 10_000;
+    final int to = 40_000;
 
-    Integer[] arr = new Integer[n];
-    for (int i = 0; i < n; ++i)
+    var arr = new Integer[n];
+    for (var i = 0; i < n; ++i)
       arr[i] = i;
 
-    List<Integer> list = Arrays.asList(arr);
-    List<Integer> treeList = FingerTree.mkTree(list).asList();
+    var list = Arrays.asList(arr);
+    var treeList = FingerTree.mkTree(list).asList();
 
     list = list.subList(from, to);
     treeList = treeList.subList(from, to);
 
-    ListIterator<Integer> it = treeList.listIterator();
+    var it = treeList.listIterator();
 
-    List<Integer> fwRes = new ArrayList<>(treeList.size());
-    while (it.hasNext())
+    var fwRes = new ArrayList<Integer>(treeList.size());
+    while (it.hasNext()) {
       fwRes.add(it.next());
+    }
     assertEquals(list, fwRes);
 
-    List<Integer> bwRes = new ArrayList<>(treeList.size());
-    while (it.hasPrevious())
+    var bwRes = new ArrayList<Integer>(treeList.size());
+    while (it.hasPrevious()) {
       bwRes.add(it.previous());
+    }
     Collections.reverse(bwRes);
     assertEquals(list, bwRes);
   }

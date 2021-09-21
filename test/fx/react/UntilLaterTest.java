@@ -1,6 +1,9 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,12 +13,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 class UntilLaterTest {
-  private static ExecutorService executor;
+  
+  static ExecutorService executor;
 
   @BeforeAll
   static void setupExecutor() {
@@ -29,11 +29,11 @@ class UntilLaterTest {
 
   @Test
   void retainLatestUntilLaterTest() throws InterruptedException, ExecutionException {
-    CompletableFuture<List<Integer>> future = new CompletableFuture<>();
-    EventSource<Integer> source = new EventSource<>();
-    EventStream<Integer> stream = source.retainLatestUntilLater(executor);
+    var future = new CompletableFuture<List<Integer>>();
+    var source = new EventSource<Integer>();
+    var stream = source.retainLatestUntilLater(executor);
     executor.execute(() -> {
-      List<Integer> emitted = new ArrayList<>();
+      var emitted = new ArrayList<Integer>();
       stream.subscribe(emitted::add);
       source.push(1);
       executor.execute(() -> {
@@ -56,11 +56,11 @@ class UntilLaterTest {
 
   @Test
   void queueUntilLaterTest() throws InterruptedException, ExecutionException {
-    CompletableFuture<List<Integer>> future = new CompletableFuture<>();
-    EventSource<Integer> source = new EventSource<>();
-    EventStream<Integer> stream = source.queueUntilLater(executor);
+    var future = new CompletableFuture<List<Integer>>();
+    var source = new EventSource<Integer>();
+    var stream = source.queueUntilLater(executor);
     executor.execute(() -> {
-      List<Integer> emitted = new ArrayList<>();
+      var emitted = new ArrayList<Integer>();
       stream.subscribe(emitted::add);
       source.push(1);
       executor.execute(() -> {
@@ -77,7 +77,8 @@ class UntilLaterTest {
       });
       source.push(9);
     });
-    List<Integer> emitted = future.get();
+    var emitted = future.get();
     assertEquals(Arrays.asList(1, 9, 2, 3, 4, 7, 8, 5, 6), emitted);
   }
+
 }

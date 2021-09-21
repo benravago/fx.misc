@@ -1,19 +1,20 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+
+import fx.Counter;
 
 class ConnectableTest {
 
   @Test
   void test() {
-    EventCounter counter = new EventCounter();
-    ConnectableEventStream<Integer> cs = new ConnectableEventSource<>();
-    EventStream<Integer> observed = cs.hook(counter);
-    EventSource<Integer> src1 = new EventSource<>();
-    EventSource<Integer> src2 = new EventSource<>();
-    Subscription con1 = cs.connectTo(src1.filter(x -> {
+    var counter = new Counter();
+    var cs = new ConnectableEventSource<Integer>();
+    var observed = cs.hook(counter);
+    var src1 = new EventSource<Integer>();
+    var src2 = new EventSource<Integer>();
+    var con1 = cs.connectTo(src1.filter(x -> {
       if (x == 666) {
         throw new IllegalArgumentException();
       } else {
@@ -28,7 +29,7 @@ class ConnectableTest {
     assertEquals(0, counter.get());
 
     // test event propagation
-    Subscription sub = observed.pin();
+    var sub = observed.pin();
     src1.push(1);
     src2.push(2);
     assertEquals(2, counter.getAndReset());

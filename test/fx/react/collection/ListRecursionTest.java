@@ -1,18 +1,14 @@
 package fx.react.collection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.IntFunction;
 
-import org.junit.jupiter.api.Test;
-
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 
 class ListRecursionTest {
 
@@ -21,19 +17,20 @@ class ListRecursionTest {
    */
   @Test
   void testChangeAccumulation() {
-    ObservableList<String> strings = new LiveArrayList<>("1", "22", "333");
-    LiveList<Integer> lengths = LiveList.map(strings, String::length);
+    var strings = new LiveArrayList<>("1", "22", "333");
+    var lengths = LiveList.map(strings, String::length);
 
-    IntegerProperty firstListener = new SimpleIntegerProperty(0);
+    var firstListener = new SimpleIntegerProperty(0);
 
-    List<Integer> first1Removed = new ArrayList<>();
-    List<Integer> first1Added = new ArrayList<>();
-    List<Integer> first2Removed = new ArrayList<>();
-    List<Integer> first2Added = new ArrayList<>();
-    List<Integer> secondRemoved = new ArrayList<>();
-    List<Integer> secondAdded = new ArrayList<>();
+    var first1Removed = new ArrayList<Integer>();
+    var first1Added = new ArrayList<Integer>();
+    var first2Removed = new ArrayList<Integer>();
+    var first2Added = new ArrayList<Integer>();
+    var secondRemoved = new ArrayList<Integer>();
+    var secondAdded = new ArrayList<Integer>();
 
-    IntFunction<ListChangeListener<Integer>> listenerFactory = id -> ch -> {
+    
+    var listenerFactory = (IntFunction<ListChangeListener<Integer>>) id -> ch -> {
       while (ch.next()) {
         if (firstListener.get() == 0) {
           firstListener.set(id);
@@ -65,8 +62,8 @@ class ListRecursionTest {
 
   @Test
   void testModificationAccumulation() {
-    LiveList<Integer> list = new LiveArrayList<>(1, 2, 3, 4, 5);
-    List<MaterializedModification<? extends Integer>> mods = new ArrayList<>();
+    var list = new LiveArrayList<>(1, 2, 3, 4, 5);
+    var mods = new ArrayList<MaterializedModification<? extends Integer>>();
     list.observeModifications(mod -> {
       mods.add(mod.materialize());
       if (list.size() == 3) {
@@ -91,4 +88,5 @@ class ListRecursionTest {
     assertEquals(Arrays.asList(5), mods.get(2).getRemoved());
     assertEquals(Arrays.asList(6), mods.get(2).getAdded());
   }
+
 }

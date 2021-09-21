@@ -1,20 +1,18 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 class PausableEventStreamTest {
 
   @Test
   void test() {
-    EventSource<Integer> source = new EventSource<>();
-    SuspendableEventStream<Integer> suspendable = source.pausable();
-    List<Integer> emitted = new ArrayList<>();
+    var source = new EventSource<Integer>();
+    var suspendable = source.pausable();
+    var emitted = new ArrayList<Integer>();
     suspendable.subscribe(emitted::add);
 
     source.push(1);
@@ -29,9 +27,9 @@ class PausableEventStreamTest {
 
   @Test
   void testRecursion() {
-    EventSource<Integer> source = new EventSource<>();
-    SuspendableEventStream<Integer> suspendable = source.pausable();
-    List<Integer> emitted = new ArrayList<>();
+    var source = new EventSource<Integer>();
+    var suspendable = source.pausable();
+    var emitted = new ArrayList<>();
     suspendable.subscribe(emitted::add);
     suspendable.subscribe(i -> {
       if (i == 1) {
@@ -45,4 +43,5 @@ class PausableEventStreamTest {
 
     assertEquals(Arrays.asList(1, 2, 3), emitted);
   }
+
 }

@@ -10,10 +10,10 @@ class ListsTest {
 
   @Test
   void testConcatStackSafety() {
-    List<String> singleton = Collections.singletonList("");
-    List<String> list = singleton;
+    var singleton = Collections.singletonList("");
+    var list = singleton;
 
-    for (int i = 0; i < 100_000; ++i) {
+    for (var i = 0; i < 100_000; ++i) {
       list = Lists.concat(list, singleton);
     }
 
@@ -23,13 +23,13 @@ class ListsTest {
 
   @Test
   void testConcatSublistStackSafety() {
-    List<String> singleton = Collections.singletonList("");
+    var singleton = Collections.singletonList("");
     List<String> list = new ArrayList<>(100_000);
-    for (int i = 0; i < 50_000; ++i) {
+
+    for (var i = 0; i < 50_000; ++i) {
       list.add("");
     }
-
-    for (int i = 0; i < 50_000; ++i) {
+    for (var i = 0; i < 50_000; ++i) {
       list = Lists.concat(list.subList(1, 50_000), singleton);
     }
 

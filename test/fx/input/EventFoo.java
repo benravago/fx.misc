@@ -3,11 +3,12 @@ package fx.input;
 import static fx.input.EventPattern.eventType;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import fx.input.InputMap.HandlerConsumer;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.Event;
 import javafx.event.EventType;
 import javafx.scene.Node;
+
+import fx.input.InputMap.HandlerConsumer;
 
 public class EventFoo extends Event {
 
@@ -30,7 +31,7 @@ public class EventFoo extends Event {
     return value;
   }
 
-  public static void dispatch(Event event, InputMap<?> inputMap) {
+  static void dispatch(Event event, InputMap<?> inputMap) {
     var matchingHandlers = new SimpleIntegerProperty(0);
     inputMap.forEachEventType(new HandlerConsumer<Event>() {
       @Override

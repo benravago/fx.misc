@@ -1,6 +1,7 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,11 +9,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
-import org.junit.jupiter.api.Test;
 
 class ThreadBridgeTest {
 
@@ -20,23 +18,23 @@ class ThreadBridgeTest {
   void test() throws InterruptedException, ExecutionException {
     ThreadFactory threadFactory1 = runnable -> new Thread(runnable, "thread 1");
     ThreadFactory threadFactory2 = runnable -> new Thread(runnable, "thread 2");
-    ExecutorService exec1 = Executors.newSingleThreadExecutor(threadFactory1);
-    ExecutorService exec2 = Executors.newSingleThreadExecutor(threadFactory2);
-    EventSource<Integer> src1 = new EventSource<>();
-    EventStream<Integer> stream2 = src1.threadBridge(exec1, exec2);
-    EventStream<Integer> stream1 = stream2.threadBridge(exec2, exec1);
+    var exec1 = Executors.newSingleThreadExecutor(threadFactory1);
+    var exec2 = Executors.newSingleThreadExecutor(threadFactory2);
+    var src1 = new EventSource<Integer>();
+    var stream2 = src1.threadBridge(exec1, exec2);
+    var stream1 = stream2.threadBridge(exec2, exec1);
 
-    List<Integer> emittedFrom2 = new ArrayList<>();
-    List<Integer> emittedFrom1 = new ArrayList<>();
-    List<String> emissionThreads2 = new ArrayList<>();
-    List<String> emissionThreads1 = new ArrayList<>();
+    var emittedFrom2 = new ArrayList<Integer>();
+    var emittedFrom1 = new ArrayList<Integer>();
+    var emissionThreads2 = new ArrayList<String>();
+    var emissionThreads1 = new ArrayList<String>();
 
-    CompletableFuture<List<Integer>> emittedFrom2Final = new CompletableFuture<>();
-    CompletableFuture<List<Integer>> emittedFrom1Final = new CompletableFuture<>();
-    CompletableFuture<List<String>> emissionThreads2Final = new CompletableFuture<>();
-    CompletableFuture<List<String>> emissionThreads1Final = new CompletableFuture<>();
+    var emittedFrom2Final = new CompletableFuture<List<Integer>>();
+    var emittedFrom1Final = new CompletableFuture<List<Integer>>();
+    var emissionThreads2Final = new CompletableFuture<List<String>>();
+    var emissionThreads1Final = new CompletableFuture<List<String>>();
 
-    CountDownLatch subscribed = new CountDownLatch(2);
+    var subscribed = new CountDownLatch(2);
     exec2.execute(() -> {
       stream2.subscribe(i -> {
         if (i != null) {

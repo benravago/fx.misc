@@ -6,8 +6,8 @@ class EmitOnTest {
 
   @Test
   void testStackOverflow() {
-    EventSource<Void> stream = new EventSource<>();
-    EventSource<Void> impulse = new EventSource<>();
+    var stream = new EventSource<Void>();
+    var impulse = new EventSource<Void>();
 
     stream.emitOn(impulse).subscribe(x -> impulse.push(null));
 

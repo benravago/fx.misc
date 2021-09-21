@@ -1,34 +1,30 @@
 package fx.react.collection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
-
-import org.junit.jupiter.api.Test;
-
-import fx.react.Counter;
-import fx.react.value.Val;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.ObservableList;
+
+import fx.Counter;
 
 class MemoizationListTest {
 
   @Test
   void test() {
-    ObservableList<String> source = new LiveArrayList<>("1", "22", "333");
-    IntegerProperty counter = new SimpleIntegerProperty(0);
-    MemoizedList<Integer> memoizing = LiveList.map(source, s -> {
+    var source = new LiveArrayList<>("1", "22", "333");
+    var counter = new SimpleIntegerProperty(0);
+    
+    var memoizing = LiveList.map(source, s -> {
       counter.set(counter.get() + 1);
       return s.length();
     }).memoize();
-    LiveList<Integer> memoized = memoizing.memoizedItems();
-    List<Integer> memoMirror = new ArrayList<>();
+    
+    var memoized = memoizing.memoizedItems();
+    var memoMirror = new ArrayList<Integer>();
     memoized.observeModifications(mod -> {
       memoMirror.subList(mod.getFrom(), mod.getFrom() + mod.getRemovedSize()).clear();
       memoMirror.addAll(mod.getFrom(), mod.getAddedSubList());
@@ -83,9 +79,9 @@ class MemoizationListTest {
 
   @Test
   void testForce() {
-    LiveList<Integer> source = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6);
-    MemoizedList<Integer> memoizing = source.memoize();
-    LiveList<Integer> memoized = memoizing.memoizedItems();
+    var source = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6);
+    var memoizing = source.memoize();
+    var memoized = memoizing.memoizedItems();
 
     memoizing.pin(); // otherwise no memoization takes place
 
@@ -93,12 +89,12 @@ class MemoizationListTest {
     // _ _ _ 3 _ _ _
     assertEquals(Collections.singletonList(3), memoized);
 
-    Counter counter = new Counter();
+    var counter = new Counter();
     memoized.observeChanges(ch -> {
       counter.inc();
       assertEquals(2, ch.getModificationCount());
-      ModifiedList<?> mod1 = ch.getModifications().get(0);
-      ModifiedList<?> mod2 = ch.getModifications().get(1);
+      var mod1 = ch.getModifications().get(0);
+      var mod2 = ch.getModifications().get(1);
       assertEquals(0, mod1.getFrom());
       assertEquals(0, mod1.getRemovedSize());
       assertEquals(Arrays.asList(1, 2), mod1.getAddedSubList());
@@ -113,9 +109,9 @@ class MemoizationListTest {
 
   @Test
   void testForget() {
-    LiveList<Integer> source = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6);
-    MemoizedList<Integer> memoizing = source.memoize();
-    LiveList<Integer> memoized = memoizing.memoizedItems();
+    var source = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6);
+    var memoizing = source.memoize();
+    var memoized = memoizing.memoizedItems();
 
     memoizing.pin(); // otherwise no memoization takes place
 
@@ -128,7 +124,7 @@ class MemoizationListTest {
     memoizing.forget(3, 5);
     assertEquals(4, memoized.size());
 
-    Counter counter = new Counter();
+    var counter = new Counter();
     memoized.observeQuasiChanges(ch -> {
       counter.inc();
       assertEquals(1, ch.getModificationCount());
@@ -144,8 +140,8 @@ class MemoizationListTest {
 
   @Test
   void testMemoizationOnlyStartsWhenObsesrved() {
-    MemoizedList<Integer> list = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6).memoize();
-    LiveList<Integer> memoized = list.memoizedItems();
+    var list = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6).memoize();
+    var memoized = list.memoizedItems();
 
     list.get(0);
     assertEquals(0, memoized.size());
@@ -158,8 +154,7 @@ class MemoizationListTest {
   @Test
   void testForceIsNotAllowedWhenUnobserved() {
     assertThrows(IllegalStateException.class, () -> {
-      MemoizedList<Integer> list = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6).memoize();
-
+      var list = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6).memoize();
       list.force(2, 4);
     });
   }
@@ -167,20 +162,19 @@ class MemoizationListTest {
   @Test
   void testForgetIsNotAllowedWhenUnobserved() {
     assertThrows(IllegalStateException.class, () -> {
-      MemoizedList<Integer> list = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6).memoize();
-
+      var list = new LiveArrayList<>(0, 1, 2, 3, 4, 5, 6).memoize();
       list.forget(2, 4);
     });
   }
 
   @Test
   void testRecursionWithinForce() {
-    LiveList<Integer> src = new LiveArrayList<>(0, 1, 2);
-    MemoizedList<Integer> memo1 = src.memoize();
-    MemoizedList<Integer> memo2 = memo1.map(Function.identity()).memoize();
+    var src = new LiveArrayList<>(0, 1, 2);
+    var memo1 = src.memoize();
+    var memo2 = memo1.map(Function.identity()).memoize();
     memo1.memoizedItems().sizeProperty().observeInvalidations(__ -> memo2.force(1, 2));
 
-    List<Integer> memo2Mirror = new ArrayList<>();
+    var memo2Mirror = new ArrayList<Integer>();
     memo2.memoizedItems().observeModifications(mod -> {
       memo2Mirror.subList(mod.getFrom(), mod.getFrom() + mod.getRemovedSize()).clear();
       memo2Mirror.addAll(mod.getFrom(), mod.getAddedSubList());
@@ -198,13 +192,13 @@ class MemoizationListTest {
 
   @Test
   void testMemoizedItemsChangeWithinForce() {
-    LiveList<Integer> src = new LiveArrayList<>(1, 2, 4, 8, 16, 32);
-    MemoizedList<Integer> memo1 = src.memoize();
-    MemoizedList<Integer> memo2 = memo1.map(Function.identity()).memoize();
-    Val<Integer> memo1Sum = memo1.memoizedItems().reduce((a, b) -> a + b).orElseConst(0);
+    var src = new LiveArrayList<>(1, 2, 4, 8, 16, 32);
+    var memo1 = src.memoize();
+    var memo2 = memo1.map(Function.identity()).memoize();
+    var memo1Sum = memo1.memoizedItems().reduce((a, b) -> a + b).orElseConst(0);
     memo1Sum.addListener((obs, oldVal, newVal) -> memo2.forget(0, memo2.size()));
 
-    List<Integer> memo2Mirror = new ArrayList<>();
+    var memo2Mirror = new ArrayList<Integer>();
     memo2.memoizedItems().observeModifications(mod -> {
       memo2Mirror.subList(mod.getFrom(), mod.getFrom() + mod.getRemovedSize()).clear();
       memo2Mirror.addAll(mod.getFrom(), mod.getAddedSubList());
@@ -214,4 +208,5 @@ class MemoizationListTest {
 
     assertEquals(Arrays.asList(32), memo2Mirror);
   }
+
 }

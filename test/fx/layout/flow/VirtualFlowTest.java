@@ -1,24 +1,21 @@
 package fx.layout.flow;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import fx.jupiter.Fx;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.shape.Rectangle;
 
-public class VirtualFlowTest { // extends FlowlessTestBase
+import fx.jupiter.Fx;
+
+class VirtualFlowTest { // extends FlowlessTestBase
 
   @Test @Fx
-  public void idempotentShowTest() {
+  void idempotentShowTest() {
     // create VirtualFlow with 1 big cell
-    Rectangle rect = new Rectangle(500, 500);
-    ObservableList<Rectangle> items = FXCollections.singletonObservableList(rect);
-    Viewport<Rectangle, Cell<Rectangle, Rectangle>> vf = Viewport.createVertical(items, Cell::wrapNode);
+    var rect = new Rectangle(500, 500);
+    var items = FXCollections.singletonObservableList(rect);
+    var vf = Viewport.createVertical(items, Cell::wrapNode);
     vf.resize(100, 100); // size of VirtualFlow less than that of the cell
     vf.layout();
 
@@ -29,11 +26,11 @@ public class VirtualFlowTest { // extends FlowlessTestBase
   }
 
   @Test
-  public void idempotentSetLengthOffsetTest() {
+  void idempotentSetLengthOffsetTest() {
     // create VirtualFlow with 1 big cell
-    Rectangle rect = new Rectangle(500, 500);
-    ObservableList<Rectangle> items = FXCollections.singletonObservableList(rect);
-    Viewport<Rectangle, Cell<Rectangle, Rectangle>> vf = Viewport.createVertical(items, Cell::wrapNode);
+    var rect = new Rectangle(500, 500);
+    var items = FXCollections.singletonObservableList(rect);
+    var vf = Viewport.createVertical(items, Cell::wrapNode);
     vf.resize(100, 100); // size of VirtualFlow less than that of the cell
     vf.layout();
 
@@ -44,17 +41,16 @@ public class VirtualFlowTest { // extends FlowlessTestBase
   }
 
   @Test
-  public void fastVisibleIndexTest() {
-    ObservableList<Rectangle> items = FXCollections.observableArrayList();
-    for (int i = 0; i < 100; i++) {
+  void fastVisibleIndexTest() {
+    var items = FXCollections.<Rectangle>observableArrayList();
+    for (var i = 0; i < 100; i++) {
       items.add(new Rectangle(500, 100));
     }
-
-    Viewport<Rectangle, Cell<Rectangle, Rectangle>> vf = Viewport.createVertical(items, Cell::wrapNode);
+    var vf = Viewport.createVertical(items, Cell::wrapNode);
     vf.resize(100, 450); // size of VirtualFlow enough to show several cells
     vf.layout();
 
-    ObservableList<Cell<Rectangle, Rectangle>> visibleCells = vf.visibleCells();
+    var visibleCells = vf.visibleCells();
 
     vf.show(0);
     vf.layout();
@@ -74,4 +70,5 @@ public class VirtualFlowTest { // extends FlowlessTestBase
     assertSame(visibleCells.get(visibleCells.size() - 1), vf.getCell(vf.getLastVisibleIndex()));
     assertTrue(vf.getFirstVisibleIndex() <= 99 && 99 <= vf.getLastVisibleIndex());
   }
+
 }

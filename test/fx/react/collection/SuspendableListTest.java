@@ -1,12 +1,10 @@
 package fx.react.collection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener.Change;
@@ -15,20 +13,20 @@ class SuspendableListTest {
 
   @Test
   void test() {
-    javafx.collections.ObservableList<Integer> base = FXCollections.observableArrayList(10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
-    SuspendableList<Integer> wrapped = LiveList.suspendable(base);
-    List<Integer> mirror = new ArrayList<>(wrapped);
+    var base = FXCollections.observableArrayList(10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+    var wrapped = LiveList.suspendable(base);
+    var mirror = new ArrayList<Integer>(wrapped);
     wrapped.addListener((Change<? extends Integer> change) -> {
       while (change.next()) {
         if (change.wasPermutated()) {
-          List<Integer> newMirror = new ArrayList<>(mirror);
-          for (int i = 0; i < mirror.size(); ++i) {
+          var newMirror = new ArrayList<Integer>(mirror);
+          for (var i = 0; i < mirror.size(); ++i) {
             newMirror.set(change.getPermutation(i), mirror.get(i));
           }
           mirror.clear();
           mirror.addAll(newMirror);
         } else {
-          List<Integer> sub = mirror.subList(change.getFrom(), change.getFrom() + change.getRemovedSize());
+          var sub = mirror.subList(change.getFrom(), change.getFrom() + change.getRemovedSize());
           sub.clear();
           sub.addAll(change.getAddedSubList());
         }

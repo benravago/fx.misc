@@ -15,8 +15,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import fx.Counter;
+
 @Disabled
-public class BigCellCreationAndLayoutEfficiencyTest { // extends FlowlessTestBase {
+class BigCellCreationAndLayoutEfficiencyTest { // extends FlowlessTestBase {
 
   @BeforeAll
   static void startUp() {
@@ -24,15 +26,15 @@ public class BigCellCreationAndLayoutEfficiencyTest { // extends FlowlessTestBas
   }
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     Platform.runLater(() -> start(new Stage()));
   }
 
-  private ObservableList<String> items;
-  private Counter cellCreations = new Counter();
-  private Viewport<String, ?> flow;
+  ObservableList<String> items;
+  Counter cellCreations = new Counter();
+  Viewport<String, ?> flow;
 
-  public void start(Stage stage) {
+  void start(Stage stage) {
     // set up items
     items = FXCollections.observableArrayList();
     items.addAll("red", "green", "blue", "purple");
@@ -40,7 +42,7 @@ public class BigCellCreationAndLayoutEfficiencyTest { // extends FlowlessTestBas
     // set up virtual flow
     flow = Viewport.createVertical(items, color -> {
       cellCreations.inc();
-      Region reg = new Region();
+      var reg = new Region();
       reg.setStyle("-fx-background-color: " + color);
       if (color.equals("purple"))
         reg.setPrefHeight(500.0);
@@ -49,13 +51,13 @@ public class BigCellCreationAndLayoutEfficiencyTest { // extends FlowlessTestBas
       return Cell.wrapNode(reg);
     });
 
-    StackPane stackPane = new StackPane(flow);
+    var stackPane = new StackPane(flow);
     stage.setScene(new Scene(stackPane, 200, 400));
     stage.show();
   }
 
   @Test // Relates to issue #70
-  public void having_a_very_tall_item_in_viewport_only_creates_and_lays_out_cell_once() {
+  void having_a_very_tall_item_in_viewport_only_creates_and_lays_out_cell_once() {
     // if this fails then it's probably because the very big purple cell is being created multiple times
     assertEquals(4, cellCreations.get());
   }

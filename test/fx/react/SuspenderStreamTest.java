@@ -1,22 +1,21 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import fx.react.value.SuspendableVar;
 import fx.react.value.Var;
+import fx.Counter;
 
 class SuspenderStreamTest {
 
   @Test
   void test() {
-    SuspendableVar<String> a = Var.newSimpleVar("foo").suspendable();
-    Counter counter = new Counter();
+    var a = Var.newSimpleVar("foo").suspendable();
+    var counter = new Counter();
     a.addListener((obs, oldVal, newVal) -> counter.inc());
 
-    EventSource<Void> src = new EventSource<>();
-    EventStream<Void> suspender = src.suspenderOf(a);
+    var src = new EventSource<Void>();
+    var suspender = src.suspenderOf(a);
 
     suspender.hook(x -> a.setValue("bar")).subscribe(x -> {
       assertEquals(0, counter.get());

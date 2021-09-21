@@ -14,7 +14,7 @@ import static fx.input.EventPattern.*;
 class EventPatternTest {
 
   @Test
-  public void simpleKeyMatchTest() {
+  void simpleKeyMatchTest() {
     // "p" prefix = EventPattern
     // "e" prefix = var
 

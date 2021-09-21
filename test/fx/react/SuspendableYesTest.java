@@ -1,28 +1,27 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import javafx.util.Pair;
+
+import fx.Counter;
 
 class SuspendableYesTest {
 
   @Test
   void test() {
-    SuspendableYes sy = new SuspendableYes();
+    var sy = new SuspendableYes();
 
-    Counter counter = new Counter();
+    var counter = new Counter();
     sy.addListener((obs, oldVal, newVal) -> {
       assertNotEquals(oldVal, newVal);
       counter.inc();
     });
 
-    Guard g = sy.suspend();
+    var g = sy.suspend();
 
     assertEquals(1, counter.getAndReset());
 
@@ -38,7 +37,7 @@ class SuspendableYesTest {
 
   @Test
   void recursionTest() {
-    SuspendableYes sy = new SuspendableYes();
+    var sy = new SuspendableYes();
 
     // first listener immediately suspends after resumed
     sy.addListener((ind, oldVal, newVal) -> {
@@ -48,7 +47,7 @@ class SuspendableYesTest {
     });
 
     // record changes observed by the second listener
-    List<Pair<Boolean, Boolean>> changes = new ArrayList<>();
+    var changes = new ArrayList<Pair<Boolean, Boolean>>();
     EventStreams.changesOf(sy).subscribe(ch -> changes.add(new Pair<>(ch.getOldValue(), ch.getNewValue())));
 
     sy.suspend().close();
@@ -57,11 +56,15 @@ class SuspendableYesTest {
       assertNotEquals(ch.getKey(), ch.getValue());
     }
 
-    for (int i = 0; i < changes.size() - 1; ++i) {
-      assertEquals(changes.get(i).getValue(), changes.get(i + 1).getKey(), "changes[" + i + "] = " + changes.get(i) + " and changes["
-          + (i + 1) + "] = " + changes.get(i + 1) + " are not compatible"
-
+    for (var i = 0; i < changes.size() - 1; ++i) {
+      assertEquals(
+        changes.get(i).getValue(),
+        changes.get(i + 1).getKey(),
+        "changes[" + i + "] = " + changes.get(i) +
+        " and changes[" + (i + 1) + "] = " + changes.get(i + 1) +
+        " are not compatible"
       );
     }
   }
+
 }

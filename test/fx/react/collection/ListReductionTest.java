@@ -1,26 +1,21 @@
 package fx.react.collection;
 
-// import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.jupiter.api.Test;
-
-import fx.react.value.Val;
-import fx.react.value.Var;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
+import fx.react.value.Var;
 
 class ListReductionTest {
 
   @Test
   void testWhenUnbound() {
-    ObservableList<Integer> list = FXCollections.observableArrayList(1, 1, 1, 1, 1);
-    Val<Integer> sum = LiveList.reduce(list, (a, b) -> a + b);
+    var list = FXCollections.observableArrayList(1, 1, 1, 1, 1);
+    var sum = LiveList.reduce(list, (a, b) -> a + b);
 
     assertEquals(5, sum.getValue().intValue());
 
@@ -33,9 +28,9 @@ class ListReductionTest {
 
   @Test
   void testWhenBound() {
-    ObservableList<Integer> list = FXCollections.observableArrayList(1, 1, 1, 1, 1);
-    Val<Integer> sum = LiveList.reduce(list, (a, b) -> a + b);
-    Var<Integer> lastObserved = Var.newSimpleVar(sum.getValue());
+    var list = FXCollections.observableArrayList(1, 1, 1, 1, 1);
+    var sum = LiveList.reduce(list, (a, b) -> a + b);
+    var lastObserved = Var.newSimpleVar(sum.getValue());
 
     assertEquals(5, lastObserved.getValue().intValue());
 
@@ -53,9 +48,9 @@ class ListReductionTest {
 
   @Test
   void testMultipleModificationsWhenBound() {
-    SuspendableList<Integer> list = new LiveArrayList<>(1, 1, 1, 1, 1).suspendable();
-    Val<Integer> sum = list.reduce((a, b) -> a + b);
-    Var<Integer> lastObserved = Var.newSimpleVar(null);
+    var list = new LiveArrayList<>(1, 1, 1, 1, 1).suspendable();
+    var sum = list.reduce((a, b) -> a + b);
+    var lastObserved = Var.<Integer>newSimpleVar(null);
     sum.observeChanges((obs, oldVal, newVal) -> lastObserved.setValue(newVal));
     list.suspendWhile(() -> {
       list.addAll(0, Arrays.asList(3, 2));
@@ -67,22 +62,26 @@ class ListReductionTest {
 
   @Test
   void testRecursion() {
-    SuspendableList<Integer> list = new LiveArrayList<>(1, 1, 1, 1, 1).suspendable();
-    Val<Integer> sum = list.reduce((a, b) -> a + b);
-    Var<Integer> lastObserved = Var.newSimpleVar(null);
-    Random random = new Random(0xcafebabe);
+    var list = new LiveArrayList<>(1, 1, 1, 1, 1).suspendable();
+    var sum = list.reduce((a, b) -> a + b);
+    var lastObserved = Var.<Integer>newSimpleVar(null);
+    var random = new Random(0xcafebabe);
     sum.addListener(obs -> {
-      Integer newVal = sum.getValue();
+      var newVal = sum.getValue();
       if (newVal < 1000) {
         list.suspendWhile(() -> {
           // remove 4 items
-          int i = random.nextInt(list.size() - 3);
+          var i = random.nextInt(list.size() - 3);
           list.subList(i, i + 3).clear();
           list.remove(random.nextInt(list.size()));
 
           // insert 5 items
-          list.addAll(random.nextInt(list.size()),
-              Arrays.asList(random.nextInt(12), random.nextInt(12), random.nextInt(12)));
+          list.addAll(
+            random.nextInt(list.size()),
+            Arrays.asList(random.nextInt(12),
+            random.nextInt(12),
+            random.nextInt(12))
+          );
           list.add(random.nextInt(list.size()), random.nextInt(12));
           list.add(random.nextInt(list.size()), random.nextInt(12));
         });
@@ -93,4 +92,5 @@ class ListReductionTest {
     // assertThat(lastObserved.getValue().intValue(), greaterThanOrEqualTo(1000));
     assertTrue(lastObserved.getValue().intValue() >= 1000);
   }
+
 }

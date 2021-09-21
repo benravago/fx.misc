@@ -1,22 +1,21 @@
 package fx.react.value;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import fx.react.Counter;
 import javafx.util.Pair;
+
+import fx.Counter;
 
 class ListenerInvocationTest {
 
   @Test
   void test() {
-    Counter invalidations = new Counter();
-    Var<Pair<Integer, Integer>> observedChange = Var.newSimpleVar(null);
+    var invalidations = new Counter();
+    var observedChange = Var.<Pair<Integer, Integer>>newSimpleVar(null);
 
-    Var<Integer> src = Var.newSimpleVar(1);
-    Val<Integer> squared = src.map(i -> i * i);
+    var src = Var.newSimpleVar(1);
+    var squared = src.map(i -> i * i);
     squared.addListener(obs -> invalidations.inc());
 
     assertEquals(0, invalidations.get());
@@ -42,4 +41,5 @@ class ListenerInvocationTest {
     assertEquals(1, invalidations.getAndReset());
     assertNull(observedChange.getValue());
   }
+
 }

@@ -1,25 +1,23 @@
 package fx.react.value;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import javafx.beans.property.SimpleIntegerProperty;
 
 import fx.react.collection.Change;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 
 class ValTest {
 
   @Test
   void changesTest() {
-    IntegerProperty src = new SimpleIntegerProperty(0);
-    Val<Number> val = Val.wrap(src);
+    var src = new SimpleIntegerProperty(0);
+    var val = Val.wrap(src);
 
-    List<Change<Number>> changes = new ArrayList<>();
+    var changes = new ArrayList<Change<Number>>();
     val.changes().subscribe(changes::add);
 
     src.set(1);

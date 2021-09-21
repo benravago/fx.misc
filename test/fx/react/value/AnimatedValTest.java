@@ -1,33 +1,30 @@
 package fx.react.value;
 
-// import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import fx.react.EventStreams;
-import fx.react.util.Interpolator;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-// import javafx.embed.swing.JFXPanel;
+
+import fx.react.EventStreams;
+import fx.react.util.Interpolator;
 
 class AnimatedValTest {
 
-  private static class WaitUntilListener<T> implements ChangeListener<T> {
-    private final Predicate<T> pred;
-    private final CompletableFuture<?> toComplete;
+  static class WaitUntilListener<T> implements ChangeListener<T> {
+    
+    final Predicate<T> pred;
+    final CompletableFuture<?> toComplete;
 
     WaitUntilListener(Predicate<T> pred, CompletableFuture<?> toComplete) {
       this.pred = pred;
@@ -41,13 +38,10 @@ class AnimatedValTest {
         toComplete.complete(null);
       }
     }
-
   }
 
-  private static <T> void waitUntil(ObservableValue<T> obs, Predicate<T> pred, int timeoutMillis)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    CompletableFuture<Void> future = new CompletableFuture<>();
-
+  static <T> void waitUntil(ObservableValue<T> obs, Predicate<T> pred, int timeoutMillis) throws InterruptedException, ExecutionException, TimeoutException {
+    var future = new CompletableFuture<Void>();
     Platform.runLater(() -> {
       if (pred.test(obs.getValue())) {
         future.complete(null);
@@ -55,7 +49,6 @@ class AnimatedValTest {
         obs.addListener(new WaitUntilListener<>(pred, future));
       }
     });
-
     future.get(timeoutMillis, TimeUnit.MILLISECONDS);
   }
 
@@ -69,8 +62,8 @@ class AnimatedValTest {
    */
   @Test
   void sanityTest() throws InterruptedException, ExecutionException, TimeoutException {
-    Var<Double> src = Var.newSimpleVar(0.0);
-    Val<Double> anim = src.animate(Duration.ofMillis(30), Interpolator.EASE_BOTH_DOUBLE);
+    var src = Var.newSimpleVar(0.0);
+    var anim = src.animate(Duration.ofMillis(30), Interpolator.EASE_BOTH_DOUBLE);
 
     Platform.runLater(() -> {
       src.setValue(33.0);
@@ -80,14 +73,13 @@ class AnimatedValTest {
   }
 
   @Test
-  void testEqualNumberOfFramesForFixedDuration()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    Var<Double> src1 = Var.newSimpleVar(0.0);
-    Var<Double> src2 = Var.newSimpleVar(0.0);
-    Val<Double> anim1 = src1.animate(Duration.ofMillis(500), Interpolator.LINEAR_DOUBLE);
-    Val<Double> anim2 = src2.animate(Duration.ofMillis(500), Interpolator.LINEAR_DOUBLE);
-    List<Double> vals1 = new ArrayList<>();
-    List<Double> vals2 = new ArrayList<>();
+  void testEqualNumberOfFramesForFixedDuration() throws InterruptedException, ExecutionException, TimeoutException {
+    var src1 = Var.newSimpleVar(0.0);
+    var src2 = Var.newSimpleVar(0.0);
+    var anim1 = src1.animate(Duration.ofMillis(500), Interpolator.LINEAR_DOUBLE);
+    var anim2 = src2.animate(Duration.ofMillis(500), Interpolator.LINEAR_DOUBLE);
+    var vals1 = new ArrayList<Double>();
+    var vals2 = new ArrayList<Double>();
 
     Platform.runLater(() -> {
       EventStreams.valuesOf(anim1).subscribe(vals1::add);
@@ -104,14 +96,13 @@ class AnimatedValTest {
   }
 
   @Test
-  void testProportionalNumberOfFramesForFixedSpeed()
-      throws InterruptedException, ExecutionException, TimeoutException {
-    Var<Integer> src1 = Var.newSimpleVar(0);
-    Var<Integer> src2 = Var.newSimpleVar(0);
-    Val<Integer> anim1 = src1.animate((a, b) -> Duration.ofMillis(b - a), Interpolator.LINEAR_INTEGER);
-    Val<Integer> anim2 = src2.animate((a, b) -> Duration.ofMillis(b - a), Interpolator.LINEAR_INTEGER);
-    List<Integer> vals1 = new ArrayList<>();
-    List<Integer> vals2 = new ArrayList<>();
+  void testProportionalNumberOfFramesForFixedSpeed() throws InterruptedException, ExecutionException, TimeoutException {
+    var src1 = Var.newSimpleVar(0);
+    var src2 = Var.newSimpleVar(0);
+    var anim1 = src1.animate((a, b) -> Duration.ofMillis(b - a), Interpolator.LINEAR_INTEGER);
+    var anim2 = src2.animate((a, b) -> Duration.ofMillis(b - a), Interpolator.LINEAR_INTEGER);
+    var vals1 = new ArrayList<Integer>();
+    var vals2 = new ArrayList<Integer>();
 
     Platform.runLater(() -> {
       EventStreams.valuesOf(anim1).subscribe(vals1::add);
@@ -133,9 +124,9 @@ class AnimatedValTest {
 
   @Test
   void midAnimationChangeTest() throws InterruptedException, ExecutionException, TimeoutException {
-    Var<Double> src = Var.newSimpleVar(100.0);
-    Val<Double> anim = src.animate(Duration.ofMillis(200), Interpolator.EASE_BOTH_DOUBLE);
-    List<Double> vals = new ArrayList<>();
+    var src = Var.newSimpleVar(100.0);
+    var anim = src.animate(Duration.ofMillis(200), Interpolator.EASE_BOTH_DOUBLE);
+    var vals = new ArrayList<Double>();
 
     Platform.runLater(() -> {
       EventStreams.valuesOf(anim).subscribe(vals::add);
@@ -154,4 +145,5 @@ class AnimatedValTest {
 
     assertTrue(vals.stream().noneMatch(x -> x == 300.0), "Value 300.0 never reached");
   }
+
 }

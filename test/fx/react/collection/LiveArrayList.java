@@ -8,19 +8,20 @@ import java.util.List;
 
 import fx.react.Subscription;
 
-public final class LiveArrayList<E> extends LiveListBase<E> {
-  private List<E> list;
+class LiveArrayList<E> extends LiveListBase<E> {
+  
+  List<E> list;
 
-  public LiveArrayList() {
+  LiveArrayList() {
     list = new ArrayList<>();
   }
 
-  public LiveArrayList(Collection<? extends E> c) {
+  LiveArrayList(Collection<? extends E> c) {
     list = new ArrayList<>(c);
   }
 
   @SafeVarargs
-  public LiveArrayList(E... initialElements) {
+  LiveArrayList(E... initialElements) {
     this(Arrays.asList(initialElements));
   }
 
@@ -36,7 +37,7 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
 
   @Override
   public E set(int index, E element) {
-    E replaced = list.set(index, element);
+    var replaced = list.set(index, element);
     fireElemReplacement(index, replaced);
     return replaced;
   }
@@ -49,8 +50,7 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
     return true;
   }
 
-  @SafeVarargs
-  @Override
+  @Override @SafeVarargs
   public final boolean setAll(E... elems) {
     return setAll(Arrays.asList(elems));
   }
@@ -79,30 +79,29 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
     return addAll(size(), c);
   }
 
-  @SafeVarargs
-  @Override
+  @Override @SafeVarargs
   public final boolean addAll(E... elems) {
     return addAll(Arrays.asList(elems));
   }
 
   @Override
   public E remove(int index) {
-    E removed = list.remove(index);
+    var removed = list.remove(index);
     fireElemRemoval(index, removed);
     return removed;
   }
 
   @Override
   public void remove(int from, int to) {
-    List<E> sublist = list.subList(from, to);
-    List<E> removed = new ArrayList<>(sublist);
+    var sublist = list.subList(from, to);
+    var removed = new ArrayList<>(sublist);
     sublist.clear();
     fireRemoveRange(from, removed);
   }
 
   @Override
   public boolean remove(Object o) {
-    int i = list.indexOf(o);
+    var i = list.indexOf(o);
     if (i != -1) {
       remove(i);
       return true;
@@ -113,11 +112,11 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
 
   @Override
   public boolean removeAll(Collection<?> c) {
-    ListChangeAccumulator<E> acc = new ListChangeAccumulator<E>();
-    for (Object o : c) {
-      int i = list.indexOf(o);
+    var acc = new ListChangeAccumulator<E>();
+    for (var o : c) {
+      var i = list.indexOf(o);
       if (i != -1) {
-        E removed = list.remove(i);
+        var removed = list.remove(i);
         acc.add(ProperLiveList.elemRemoval(i, removed));
       }
     }
@@ -129,17 +128,16 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
     }
   }
 
-  @SafeVarargs
-  @Override
+  @Override @SafeVarargs
   public final boolean removeAll(E... elems) {
     return removeAll(Arrays.asList(elems));
   }
 
   @Override
   public boolean retainAll(Collection<?> c) {
-    ListChangeAccumulator<E> acc = new ListChangeAccumulator<E>();
-    for (int i = size() - 1; i >= 0; --i) {
-      E elem = list.get(i);
+    var acc = new ListChangeAccumulator<E>();
+    for (var i = size() - 1; i >= 0; --i) {
+      var elem = list.get(i);
       if (!c.contains(elem)) {
         list.remove(i);
         acc.add(ProperLiveList.elemRemoval(i, elem));
@@ -153,8 +151,7 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
     }
   }
 
-  @SafeVarargs
-  @Override
+  @Override @SafeVarargs
   public final boolean retainAll(E... elems) {
     return retainAll(Arrays.asList(elems));
   }
@@ -168,4 +165,5 @@ public final class LiveArrayList<E> extends LiveListBase<E> {
   protected Subscription observeInputs() {
     return Subscription.EMPTY;
   }
+
 }

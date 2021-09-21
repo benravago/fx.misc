@@ -1,21 +1,17 @@
 package fx.react.value;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.function.UnaryOperator;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import fx.react.Subscription;
+import java.util.function.UnaryOperator;
 
 class MapDynamicTest {
 
   @Test
   void test() {
-    Var<Integer> src = Var.newSimpleVar(1);
-    Var<UnaryOperator<Integer>> fn = Var.newSimpleVar(UnaryOperator.identity());
-    Val<Integer> mapped = src.mapDynamic(fn);
+    var src = Var.newSimpleVar(1);
+    var fn = Var.newSimpleVar(UnaryOperator.<Integer>identity());
+    var mapped = src.mapDynamic(fn);
 
     assertEquals(1, mapped.getValue().intValue());
 
@@ -25,7 +21,7 @@ class MapDynamicTest {
     fn.setValue(i -> i + i);
     assertEquals(4, mapped.getValue().intValue());
 
-    Subscription sub = mapped.observeChanges((obs, oldVal, newVal) -> {
+    var sub = mapped.observeChanges((obs, oldVal, newVal) -> {
       assertEquals(4, oldVal.intValue());
       assertEquals(8, newVal.intValue());
     });

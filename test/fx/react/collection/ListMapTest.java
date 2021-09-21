@@ -1,39 +1,36 @@
 package fx.react.collection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Test;
-
-import fx.react.value.Var;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
+import fx.react.value.Var;
 
 class ListMapTest {
 
   @Test
   void testGet() {
-    ObservableList<String> strings = FXCollections.observableArrayList("1", "22", "333");
-    LiveList<Integer> lengths = LiveList.map(strings, String::length);
+    var strings = FXCollections.observableArrayList("1", "22", "333");
+    var lengths = LiveList.map(strings, String::length);
 
     assertEquals(Arrays.asList(1, 2, 3), lengths);
   }
 
   @Test
   void testChanges() {
-    ObservableList<String> strings = FXCollections.observableArrayList("1", "22", "333");
-    LiveList<Integer> lengths = LiveList.map(strings, String::length);
+    var strings = FXCollections.observableArrayList("1", "22", "333");
+    var lengths = LiveList.map(strings, String::length);
 
-    List<Integer> removed = new ArrayList<>();
-    List<Integer> added = new ArrayList<>();
+    var removed = new ArrayList<Integer>();
+    var added = new ArrayList<Integer>();
     lengths.observeChanges(ch -> {
-      for (ModifiedList<? extends Integer> mod : ch.getModifications()) {
+      for (var mod : ch.getModifications()) {
         removed.addAll(mod.getRemoved());
         added.addAll(mod.getAddedSubList());
       }
@@ -47,9 +44,9 @@ class ListMapTest {
 
   @Test
   void testLaziness() {
-    ObservableList<String> strings = FXCollections.observableArrayList("1", "22", "333");
-    IntegerProperty evaluations = new SimpleIntegerProperty(0);
-    LiveList<Integer> lengths = LiveList.map(strings, s -> {
+    var strings = FXCollections.observableArrayList("1", "22", "333");
+    var evaluations = new SimpleIntegerProperty(0);
+    var lengths = LiveList.map(strings, s -> {
       evaluations.set(evaluations.get() + 1);
       return s.length();
     });
@@ -63,13 +60,13 @@ class ListMapTest {
 
   @Test
   void testLazinessOnChangeAccumulation() {
-    ObservableList<String> strings = FXCollections.observableArrayList("1", "22", "333");
-    IntegerProperty evaluations = new SimpleIntegerProperty(0);
-    LiveList<Integer> lengths = LiveList.map(strings, s -> {
+    var strings = FXCollections.observableArrayList("1", "22", "333");
+    var evaluations = new SimpleIntegerProperty(0);
+    var lengths = LiveList.map(strings, s -> {
       evaluations.set(evaluations.get() + 1);
       return s.length();
     });
-    SuspendableList<Integer> suspendable = lengths.suspendable();
+    var suspendable = lengths.suspendable();
 
     suspendable.observeChanges(ch -> {
     });
@@ -83,14 +80,14 @@ class ListMapTest {
 
   @Test
   void testDynamicMap() {
-    LiveList<String> strings = new LiveArrayList<>("1", "22", "333");
-    Var<Function<String, Integer>> fn = Var.newSimpleVar(String::length);
-    SuspendableList<Integer> ints = strings.mapDynamic(fn).suspendable();
+    var strings = new LiveArrayList<>("1", "22", "333");
+    var fn = Var.<Function<String, Integer>>newSimpleVar(String::length);
+    var ints = strings.mapDynamic(fn).suspendable();
 
     assertEquals(2, ints.get(1).intValue());
 
     ints.observeChanges(ch -> {
-      for (ModifiedList<?> mod : ch) {
+      for (var mod : ch) {
         assertEquals(Arrays.asList(1, 2, 3), mod.getRemoved());
         assertEquals(Arrays.asList(1, 16, 9), mod.getAddedSubList());
       }
@@ -101,4 +98,5 @@ class ListMapTest {
       fn.setValue(s -> s.length() * s.length());
     });
   }
+
 }

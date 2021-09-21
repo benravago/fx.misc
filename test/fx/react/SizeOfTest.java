@@ -1,24 +1,21 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 class SizeOfTest {
 
   @Test
   void test() {
-    ObservableList<Integer> list = FXCollections.observableArrayList();
-    EventStream<Integer> size = EventStreams.sizeOf(list);
-    List<Integer> sizes = new ArrayList<>();
-    Subscription sub = size.subscribe(sizes::add);
+    var list = FXCollections.<Integer>observableArrayList();
+    var size = EventStreams.sizeOf(list);
+    var sizes = new ArrayList<Integer>();
+    var sub = size.subscribe(sizes::add);
     list.add(1);
     list.addAll(2, 3, 4);
     assertEquals(Arrays.asList(0, 1, 4), sizes);

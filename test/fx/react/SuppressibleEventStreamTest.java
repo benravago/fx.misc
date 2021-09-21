@@ -1,20 +1,18 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 class SuppressibleEventStreamTest {
 
   @Test
   void test() {
-    EventSource<Integer> source = new EventSource<>();
-    SuspendableEventStream<Integer> suspendable = source.suppressible();
-    List<Integer> emitted = new ArrayList<>();
+    var source = new EventSource<Integer>();
+    var suspendable = source.suppressible();
+    var emitted = new ArrayList<Integer>();
     suspendable.subscribe(emitted::add);
 
     source.push(1);

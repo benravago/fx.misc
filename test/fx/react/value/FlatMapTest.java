@@ -1,41 +1,35 @@
 package fx.react.value;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import fx.react.Counter;
-import fx.react.Subscription;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+
+import fx.Counter;
 
 class FlatMapTest {
 
-  private static class A {
+  static class A {
     final SimpleVar<B> b = (SimpleVar<B>) Var.<B>newSimpleVar(null);
   }
 
-  private static class B {
+  static class B {
     final SimpleVar<String> s = (SimpleVar<String>) Var.<String>newSimpleVar(null);
   }
 
   @Test
   void flatMapTest() {
-    Property<A> base = new SimpleObjectProperty<>();
-    Val<String> flat = Val.flatMap(base, a -> a.b).flatMap(b -> b.s);
+    var base = new SimpleObjectProperty<A>();
+    var flat = Val.flatMap(base, a -> a.b).flatMap(b -> b.s);
 
-    Counter invalidationCounter = new Counter();
+    var invalidationCounter = new Counter();
     flat.addListener(obs -> invalidationCounter.inc());
 
     assertNull(flat.getValue());
 
-    A a = new A();
-    B b = new B();
+    var a = new A();
+    var b = new B();
     b.s.setValue("s1");
     a.b.setValue(b);
     base.setValue(a);
@@ -65,10 +59,10 @@ class FlatMapTest {
 
   @Test
   void selectPropertyTest() {
-    Property<A> base = new SimpleObjectProperty<>();
-    Var<String> selected = Val.flatMap(base, a -> a.b).selectVar(b -> b.s);
+    var base = new SimpleObjectProperty<A>();
+    var selected = Val.flatMap(base, a -> a.b).selectVar(b -> b.s);
 
-    Counter invalidationCounter = new Counter();
+    var invalidationCounter = new Counter();
     selected.addListener(obs -> invalidationCounter.inc());
 
     assertNull(selected.getValue());
@@ -77,7 +71,7 @@ class FlatMapTest {
     assertNull(selected.getValue());
     assertEquals(0, invalidationCounter.getAndReset());
 
-    Property<String> src = new SimpleStringProperty();
+    var src = new SimpleStringProperty();
 
     selected.bind(src);
     assertNull(selected.getValue());
@@ -87,8 +81,8 @@ class FlatMapTest {
     assertNull(selected.getValue());
     assertEquals(0, invalidationCounter.getAndReset());
 
-    A a = new A();
-    B b = new B();
+    var a = new A();
+    var b = new B();
     b.s.setValue("X");
     a.b.setValue(b);
     base.setValue(a);
@@ -102,7 +96,7 @@ class FlatMapTest {
     assertEquals("2", selected.getValue());
     assertEquals("2", b.s.getValue());
 
-    B b2 = new B();
+    var b2 = new B();
     b2.s.setValue("Y");
     a.b.setValue(b2);
     assertEquals(1, invalidationCounter.getAndReset());
@@ -144,22 +138,22 @@ class FlatMapTest {
 
   @Test
   void selectPropertyResetTest() {
-    Property<A> base = new SimpleObjectProperty<>();
-    Var<String> selected = Val.flatMap(base, a -> a.b).selectVar(b -> b.s, "X");
-    StringProperty source = new SimpleStringProperty("A");
+    var base = new SimpleObjectProperty<A>();
+    var selected = Val.flatMap(base, a -> a.b).selectVar(b -> b.s, "X");
+    var source = new SimpleStringProperty("A");
 
     selected.bind(source);
 
     assertEquals(null, selected.getValue());
 
-    A a = new A();
-    B b = new B();
+    var a = new A();
+    var b = new B();
     a.b.setValue(b);
     base.setValue(a);
     assertEquals("A", selected.getValue());
     assertEquals("A", b.s.getValue());
 
-    B b2 = new B();
+    var b2 = new B();
     a.b.setValue(b2);
     assertEquals("A", b2.s.getValue());
     assertEquals("X", b.s.getValue());
@@ -170,14 +164,14 @@ class FlatMapTest {
 
   @Test
   void lazinessTest() {
-    SimpleVar<A> base = (SimpleVar<A>) Var.<A>newSimpleVar(null);
-    Val<B> flatMapped = base.flatMap(a -> a.b);
-    Var<String> selected = flatMapped.selectVar(b -> b.s);
+    var base = (SimpleVar<A>) Var.<A>newSimpleVar(null);
+    var flatMapped = base.flatMap(a -> a.b);
+    var selected = flatMapped.selectVar(b -> b.s);
 
     assertFalse(base.isObservingInputs());
 
-    A a = new A();
-    B b = new B();
+    var a = new A();
+    var b = new B();
     a.b.setValue(b);
     base.setValue(a);
 
@@ -185,13 +179,13 @@ class FlatMapTest {
     assertFalse(a.b.isObservingInputs());
     assertFalse(b.s.isObservingInputs());
 
-    Subscription sub = selected.pin();
+    var sub = selected.pin();
 
     assertTrue(base.isObservingInputs());
     assertTrue(a.b.isObservingInputs());
     assertTrue(b.s.isObservingInputs());
 
-    B b2 = new B();
+    var b2 = new B();
     a.b.setValue(b2);
 
     assertFalse(b.s.isObservingInputs()); // stopped observing b.s
@@ -214,4 +208,5 @@ class FlatMapTest {
     assertFalse(b2.s.isObservingInputs());
     assertFalse(((ValBase<B>) flatMapped).isObservingInputs());
   }
+
 }

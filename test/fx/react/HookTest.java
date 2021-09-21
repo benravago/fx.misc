@@ -1,7 +1,6 @@
 package fx.react;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class HookTest {
@@ -13,7 +12,7 @@ class HookTest {
   @Test
   void recursionPreventionTest() {
     assertThrows(IllegalStateException.class, () -> {
-      EventSource<Integer> source = new EventSource<>();
+      var source = new EventSource<Integer>();
       source.hook(i -> source.push(i - 1)).pin();
       source.push(5);
     });
