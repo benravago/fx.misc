@@ -16,7 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 class ThenAccumulateForTest {
-  
+
   ScheduledExecutorService scheduler;
 
   @BeforeEach

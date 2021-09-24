@@ -13,23 +13,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class FxRunner implements InvocationInterceptor {
 
-  private static volatile boolean ready = false;
-
-  public static void startup() {
-    if (!ready) {
-      Platform.startup(() -> {
-        ready = true;
-        System.out.println("JavaFX Platform ready");
-      });
-    }
-  }
-  
-  public static void shutdown() {
-    if (ready) {
-      Platform.exit();
-    }
-  }
-
   @SuppressWarnings("unchecked")
   static <T> T proceed(Invocation<T> invocation) throws Throwable {
     var t = Thread.currentThread();
@@ -46,43 +29,43 @@ public class FxRunner implements InvocationInterceptor {
 
   static <T> T intercept(Invocation<T> invocation, ReflectiveInvocationContext<?> context) throws Throwable {
     if (context.getExecutable().isAnnotationPresent(Fx.class)) { // never null
-      startup(); // ensure toolkit is initialized
+      FxEnv.startup(); // ensure toolkit is initialized
       return proceed(invocation); // run in FX thread
-    } else { 
+    } else {
       return invocation.proceed();
     }
   }
-  
-  @Override 
+
+  @Override
   public <T> T interceptTestClassConstructor(Invocation<T> invocation, ReflectiveInvocationContext<Constructor<T>> invocationContext, ExtensionContext extensionContext) throws Throwable {
     return intercept(invocation,invocationContext);
   }
-  @Override 
+  @Override
   public void interceptBeforeAllMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     intercept(invocation,invocationContext);
   }
-  @Override 
+  @Override
   public void interceptBeforeEachMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     intercept(invocation,invocationContext);
   }
-  @Override 
+  @Override
   public void interceptTestMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     intercept(invocation,invocationContext);
   }
-  @Override 
+  @Override
   public <T> T interceptTestFactoryMethod(Invocation<T> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     return intercept(invocation,invocationContext);
   }
-  @Override 
+  @Override
   public void interceptTestTemplateMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     intercept(invocation,invocationContext);
   }
-  @Override 
+  @Override
   public void interceptAfterEachMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     intercept(invocation,invocationContext);
   }
 
-  @Override 
+  @Override
   public void interceptAfterAllMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
     intercept(invocation,invocationContext);
   }

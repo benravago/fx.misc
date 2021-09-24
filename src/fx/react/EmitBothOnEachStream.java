@@ -1,11 +1,9 @@
 package fx.react;
 
-import javafx.util.Pair;
-
 /**
  * {@link EventStream#emitBothOnEach(EventStream)}
  */
-class EmitBothOnEachStream<A, I> extends EventStreamBase<Pair<A, I>> {
+class EmitBothOnEachStream<A, I> extends EventStreamBase<EventStreams.Di<A, I>> {
 
   final EventStream<A> source;
   final EventStream<I> impulse;
@@ -26,7 +24,7 @@ class EmitBothOnEachStream<A, I> extends EventStreamBase<Pair<A, I>> {
     });
     var s2 = impulse.subscribe(i -> {
       if (hasValue) {
-        emit(new Pair<>(a, i));
+        emit(new EventStreams.Di<>(a, i));
       }
     });
     return s1.and(s2);

@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 class DistinctStreamTest {
-  
+
   <T> void testDistinct(List<T> input, List<T> expectedOutput) {
     var source = new EventSource<T>();
     var distinct = new DistinctStream<>(source);

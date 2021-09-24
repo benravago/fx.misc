@@ -1,6 +1,6 @@
 package fx.react;
 
-import static fx.react.EventStreams.*;
+
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -25,7 +25,6 @@ import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Window;
-import javafx.util.Pair;
 
 import fx.react.util.AccumulatorSize;
 import fx.react.util.FxTimer;
@@ -33,6 +32,7 @@ import fx.react.util.NotificationAccumulator;
 import fx.react.util.Timer;
 import fx.react.value.Val;
 import fx.util.Either;
+import static fx.react.EventStreams.*;
 
 /**
  * Stream of values (events).
@@ -123,13 +123,13 @@ public interface EventStream<T> extends Observable<Consumer<? super T>> {
    *     .map(key -> key.isControlDown());
    *
    * EventSource<?> other;
-   * EventStream<Pair<Boolean, ?>> combo = EventStreams.combine(controlPresses, other);
+   * EventStream<Di<Boolean, ?>> combo = EventStreams.combine(controlPresses, other);
    *
    * // This will not run until user presses the control key at least once.
-   * combo.subscribe(Pair -> System.out.println("Combo emitted an event."));
+   * combo.subscribe(Di -> System.out.println("Combo emitted an event."));
    *
    * EventStream<Boolean> controlDown = controlPresses.withDefaultEvent(false);
-   * EventStream<Pair<Boolean, ?>> betterCombo = EventStreams.combine(controlDown, other);
+   * EventStream<Di<Boolean, ?>> betterCombo = EventStreams.combine(controlDown, other);
    * betterCombo.subscribe(Pair -> System.out.println("Better Combo emitted an event immediately upon program start."));
    * }
    * </pre>
@@ -296,8 +296,8 @@ public interface EventStream<T> extends Observable<Consumer<? super T>> {
    * that satisfy the given {@code test} and the second one emitting events
    * of this stream that do not satisfy the test.
    */
-  default Pair<EventStream<T>, EventStream<T>> fork(Predicate<? super T> test) {
-    return new Pair<>(filter(test), filter(test.negate()));
+  default Di<EventStream<T>, EventStream<T>> fork(Predicate<? super T> test) {
+    return new Di<>(filter(test), filter(test.negate()));
   }
 
   /**
@@ -559,7 +559,7 @@ public interface EventStream<T> extends Observable<Consumer<? super T>> {
    *     </li>
    * </ul>
    */
-  default <I> EventStream<Pair<T, I>> emitBothOnEach(EventStream<I> impulse) {
+  default <I> EventStream<Di<T, I>> emitBothOnEach(EventStream<I> impulse) {
     return new EmitBothOnEachStream<>(this, impulse);
   }
 

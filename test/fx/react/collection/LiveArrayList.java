@@ -9,7 +9,7 @@ import java.util.List;
 import fx.react.Subscription;
 
 class LiveArrayList<E> extends LiveListBase<E> {
-  
+
   List<E> list;
 
   LiveArrayList() {

@@ -26,7 +26,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Window;
-import javafx.util.Pair;
+
 import fx.react.collection.Change;
 import fx.react.collection.ModifiedList;
 import fx.react.collection.LiveList;
@@ -395,11 +395,11 @@ public class EventStreams {
    */
   public static EventStream<Long> animationFrames() {
     return animationTicks()
-      .accumulate(new Pair<>(0L, -1L), (state, now) -> {
-        var last = state.getValue();
-        return new Pair<>(last == -1L ? 0L : now - last, now);
+      .accumulate(new Di<>(0L, -1L), (state, now) -> {
+        var last = state.b();
+        return new Di<>(last == -1L ? 0L : now - last, now);
       })
-      .map(t -> t.getKey());
+      .map(t -> t.a());
   }
 
   /**
@@ -451,12 +451,12 @@ public class EventStreams {
     };
   }
 
-  public static <L, R> Pair<EventStream<L>, EventStream<R>> fork(EventStream<? extends Either<L, R>> stream) {
-    return new Pair<>(stream.filterMap(Either::asLeft), stream.filterMap(Either::asRight));
+  public static <L, R> Di<EventStream<L>, EventStream<R>> fork(EventStream<? extends Either<L, R>> stream) {
+    return new Di<>(stream.filterMap(Either::asLeft), stream.filterMap(Either::asRight));
   }
 
-  public static <A, B> EventStream<Pair<A, B>> zip(EventStream<A> _A, EventStream<B> _B) {
-    return new EventStreamBase<Pair<A, B>>() {
+  public static <A, B> EventStream<Di<A, B>> zip(EventStream<A> _A, EventStream<B> _B) {
+    return new EventStreamBase<Di<A, B>>() {
       Pocket<A> a = new ExclusivePocket<>();
       Pocket<B> b = new ExclusivePocket<>();
 
@@ -470,14 +470,16 @@ public class EventStreams {
       }
       void tryEmit() {
         if (a.hasValue() && b.hasValue()) {
-          emit(new Pair<>(a.getAndClear(), b.getAndClear()));
+          emit(new Di<>(a.getAndClear(), b.getAndClear()));
         }
       }
     };
   }
 
-  public static <A, B> EventStream<Pair<A, B>> combine(EventStream<A> _A, EventStream<B> _B) {
-    return new EventStreamBase<Pair<A, B>>() {
+  public record Di<A,B>(A a, B b) {}
+
+  public static <A, B> EventStream<Di<A, B>> combine(EventStream<A> _A, EventStream<B> _B) {
+    return new EventStreamBase<Di<A, B>>() {
       Pocket<A> a = new Pocket<>();
       Pocket<B> b = new Pocket<>();
 
@@ -491,7 +493,7 @@ public class EventStreams {
       }
       void tryEmit() {
         if (a.hasValue() && b.hasValue()) {
-          emit(new Pair<>(a.get(), b.get()));
+          emit(new Di<>(a.get(), b.get()));
         }
       }
     };

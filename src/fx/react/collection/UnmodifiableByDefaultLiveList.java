@@ -8,7 +8,7 @@ import javafx.collections.ObservableList;
  * Trait to be mixed into implementations of unmodifiable {@link LiveList}s.
  * Provides default implementations of mutating list methods.
  */
-interface UnmodifiableByDefaultLiveList<E> extends ObservableList<E>, UnmodifiableByDefaultList<E> {
+public interface UnmodifiableByDefaultLiveList<E> extends ObservableList<E>, UnmodifiableByDefaultList<E> {
 
   @Override
   default boolean addAll(@SuppressWarnings("unchecked") E... elems) {

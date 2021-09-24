@@ -17,12 +17,12 @@ class MemoizationListTest {
   void test() {
     var source = new LiveArrayList<>("1", "22", "333");
     var counter = new SimpleIntegerProperty(0);
-    
+
     var memoizing = LiveList.map(source, s -> {
       counter.set(counter.get() + 1);
       return s.length();
     }).memoize();
-    
+
     var memoized = memoizing.memoizedItems();
     var memoMirror = new ArrayList<Integer>();
     memoized.observeModifications(mod -> {

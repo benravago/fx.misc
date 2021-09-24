@@ -26,7 +26,7 @@ class AwaitTest {
 
   @BeforeAll
   static void startUp() {
-    fx.jupiter.FxRunner.startup(); // initializes JavaFX toolkit
+    fx.jupiter.FxEnv.startup(); // initializes JavaFX toolkit
   }
 
   @BeforeEach

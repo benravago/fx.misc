@@ -6,7 +6,7 @@ import java.util.Collection;
  * Trait to be mixed into implementations of unmodifiable lists.
  * Provides default implementations of mutating list methods.
  */
-interface UnmodifiableByDefaultList<E> extends ListMethods<E> {
+public interface UnmodifiableByDefaultList<E> extends ListMethods<E> {
 
   @Override
   default E set(int index, E element) {

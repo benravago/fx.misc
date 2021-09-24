@@ -29,7 +29,7 @@ class ListRecursionTest {
     var secondRemoved = new ArrayList<Integer>();
     var secondAdded = new ArrayList<Integer>();
 
-    
+
     var listenerFactory = (IntFunction<ListChangeListener<Integer>>) id -> ch -> {
       while (ch.next()) {
         if (firstListener.get() == 0) {

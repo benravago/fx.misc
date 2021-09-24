@@ -22,7 +22,7 @@ import fx.react.util.Interpolator;
 class AnimatedValTest {
 
   static class WaitUntilListener<T> implements ChangeListener<T> {
-    
+
     final Predicate<T> pred;
     final CompletableFuture<?> toComplete;
 
@@ -54,7 +54,7 @@ class AnimatedValTest {
 
   @BeforeAll
   static void setup() {
-    fx.jupiter.FxRunner.startup(); // initializes JavaFX toolkit
+    fx.jupiter.FxEnv.startup(); // initializes JavaFX toolkit
   }
 
   /**
