@@ -23,8 +23,7 @@ import static fx.rich.text.model.TwoDimensional.Bias.*;
 
 class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDocument<PS, SEG, S> {
 
-  private class ParagraphList extends LiveListBase<Paragraph<PS, SEG, S>>
-      implements UnmodifiableByDefaultLiveList<Paragraph<PS, SEG, S>> {
+  class Paragraphs extends LiveListBase<Paragraph<PS, SEG, S>> implements UnmodifiableByDefaultLiveList<Paragraph<PS, SEG, S>> {
 
     @Override
     public Paragraph<PS, SEG, S> get(int index) {
@@ -39,13 +38,10 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
     @Override
     protected Subscription observeInputs() {
       return parChangesList.subscribe(list -> {
-        ListChangeAccumulator<Paragraph<PS, SEG, S>> accumulator = new ListChangeAccumulator<>();
-        for (MaterializedModification<Paragraph<PS, SEG, S>> mod : list) {
-          try {
-            mod = mod.trim();
-          } catch (IndexOutOfBoundsException EX) {
-          }
-
+        var accumulator = new ListChangeAccumulator<Paragraph<PS, SEG, S>>();
+        for (var mod : list) {
+          try { mod = mod.trim(); }
+          catch (IndexOutOfBoundsException ignore) {}
           // add the quasiListModification itself, not as a quasiListChange, in case some overlap
           accumulator.add(QuasiModification.create(mod.getFrom(), mod.getRemoved(), mod.getAddedSize()));
         }
@@ -54,19 +50,18 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
     }
   }
 
-  private ReadOnlyStyledDocument<PS, SEG, S> doc;
+  ReadOnlyStyledDocument<PS, SEG, S> doc;
 
-  private final EventSource<List<RichTextChange<PS, SEG, S>>> internalRichChangeList = new EventSource<>();
-  private final SuspendableEventStream<List<RichTextChange<PS, SEG, S>>> richChangeList = internalRichChangeList
-      .pausable();
+  final EventSource<List<RichTextChange<PS, SEG, S>>> internalRichChangeList = new EventSource<>();
+  final SuspendableEventStream<List<RichTextChange<PS, SEG, S>>> richChangeList = internalRichChangeList.pausable();
 
   @Override
   public EventStream<List<RichTextChange<PS, SEG, S>>> multiRichChanges() {
     return richChangeList;
   }
 
-  private final Val<String> internalText = Val.create(() -> doc.getText(), internalRichChangeList);
-  private final SuspendableVal<String> text = internalText.suspendable();
+  final Val<String> internalText = Val.create(() -> doc.getText(), internalRichChangeList);
+  final SuspendableVal<String> text = internalText.suspendable();
 
   @Override
   public String getText() {
@@ -78,8 +73,8 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
     return text;
   }
 
-  private final Val<Integer> internalLength = Val.create(() -> doc.length(), internalRichChangeList);
-  private final SuspendableVal<Integer> length = internalLength.suspendable();
+  final Val<Integer> internalLength = Val.create(() -> doc.length(), internalRichChangeList);
+  final SuspendableVal<Integer> length = internalLength.suspendable();
 
   @Override
   public int getLength() {
@@ -96,9 +91,9 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
     return length.getValue();
   }
 
-  private final EventSource<List<MaterializedModification<Paragraph<PS, SEG, S>>>> parChangesList = new EventSource<>();
+  final EventSource<List<MaterializedModification<Paragraph<PS, SEG, S>>>> parChangesList = new EventSource<>();
 
-  private final SuspendableList<Paragraph<PS, SEG, S>> paragraphs = new ParagraphList().suspendable();
+  final SuspendableList<Paragraph<PS, SEG, S>> paragraphs = new Paragraphs().suspendable();
 
   @Override
   public LiveList<Paragraph<PS, SEG, S>> getParagraphs() {
@@ -110,7 +105,7 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
     return doc;
   }
 
-  private final SuspendableNo beingUpdated = new SuspendableNo();
+  final SuspendableNo beingUpdated = new SuspendableNo();
 
   @Override
   public final SuspendableNo beingUpdatedProperty() {
@@ -127,14 +122,14 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
    */
   GenericEditableStyledDocumentBase(ReadOnlyStyledDocument<PS, SEG, S> initialContent) {
     this.doc = initialContent;
-
-    final Suspendable omniSuspendable = Suspendable.combine(text, length,
-
-        // add streams after properties, to be released before them
-        richChangeList,
-
-        // paragraphs to be released first
-        paragraphs);
+    var omniSuspendable = Suspendable.combine(
+      text,
+      length,
+      // add streams after properties, to be released before them
+      richChangeList,
+      // paragraphs to be released first
+      paragraphs
+    );
     omniSuspendable.suspendWhen(beingUpdated);
   }
 
@@ -189,13 +184,13 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
 
   @Override
   public void setStyleSpans(int from, StyleSpans<? extends S> styleSpans) {
-    int len = styleSpans.length();
+    var len = styleSpans.length();
     doc.replace(from, from + len, d -> {
-      Position i = styleSpans.position(0, 0);
-      List<Paragraph<PS, SEG, S>> pars = new ArrayList<>(d.getParagraphs().size());
-      for (Paragraph<PS, SEG, S> p : d.getParagraphs()) {
-        Position j = i.offsetBy(p.length(), Backward);
-        StyleSpans<? extends S> spans = styleSpans.subView(i, j);
+      var i = styleSpans.position(0, 0);
+      var pars = new ArrayList<Paragraph<PS, SEG, S>>(d.getParagraphs().size());
+      for (var p : d.getParagraphs()) {
+        var j = i.offsetBy(p.length(), Backward);
+        var spans = styleSpans.subView(i, j);
         pars.add(p.restyle(0, spans));
         i = j.offsetBy(1, Forward); // skip the newline
       }
@@ -223,19 +218,13 @@ class GenericEditableStyledDocumentBase<PS, SEG, S> implements EditableStyledDoc
     return doc.subSequence(start, end);
   }
 
-  /* ********************************************************************** *
-   *                                                                        *
-   * Private and package private methods                                    *
-   *                                                                        *
-   * ********************************************************************** */
+  /* and package private methods */
 
-  private void updateSingle(ReadOnlyStyledDocument<PS, SEG, S> newValue, RichTextChange<PS, SEG, S> change,
-      MaterializedModification<Paragraph<PS, SEG, S>> parChange) {
+  void updateSingle(ReadOnlyStyledDocument<PS, SEG, S> newValue, RichTextChange<PS, SEG, S> change, MaterializedModification<Paragraph<PS, SEG, S>> parChange) {
     updateMulti(newValue, Collections.singletonList(change), Collections.singletonList(parChange));
   }
 
-  private void updateMulti(ReadOnlyStyledDocument<PS, SEG, S> newValue, List<RichTextChange<PS, SEG, S>> richChanges,
-      List<MaterializedModification<Paragraph<PS, SEG, S>>> parChanges) {
+  void updateMulti(ReadOnlyStyledDocument<PS, SEG, S> newValue, List<RichTextChange<PS, SEG, S>> richChanges, List<MaterializedModification<Paragraph<PS, SEG, S>>> parChanges) {
     this.doc = newValue;
     beingUpdated.suspendWhile(() -> {
       internalRichChangeList.push(richChanges);

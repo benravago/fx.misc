@@ -43,7 +43,7 @@ class ContextMenuTests extends TestCase {
     // Linux passes; Mac fails; Windows untested
     //  so for now, only run on Linux
     // TODO: See if tests pass on Windows
-    assumeTrue(isLinux());
+    assumeTrue(isLinux() && isHeadless());
 
     // when
     rightClickOnFirstLine();
@@ -57,7 +57,7 @@ class ContextMenuTests extends TestCase {
     // Linux passes; Mac fails; Windows untested
     //  so for now, only run on Linux
     // TODO: See if tests pass on Windows
-    assumeTrue(isLinux());
+    assumeTrue(isLinux() && isHeadless());
 
     // when
     toFirstLine().press(MouseButton.SECONDARY); /// moveTo(firstLineOfArea()).press(MouseButton.SECONDARY);
@@ -68,6 +68,8 @@ class ContextMenuTests extends TestCase {
 
   @Test @Disabled
   void pressing_primary_mouse_button_hides_context_menu() {
+    assumeTrue(isHeadless());
+
     // given menu is showing
     showContextMenuAt();
 
@@ -78,6 +80,8 @@ class ContextMenuTests extends TestCase {
 
   @Test @Disabled
   void pressing_middle_mouse_button_hides_context_menu() {
+    assumeTrue(isHeadless());
+
     // given menu is showing
     showContextMenuAt();
 
@@ -86,9 +90,9 @@ class ContextMenuTests extends TestCase {
     assertFalse(area.getContextMenu().isShowing());
   }
 
-  @Test @Disabled
+  @Test
   void requesting_context_nenu_via_keyboard_works_on_windows() {
-    assumeTrue(isWindows());
+    assumeTrue(isWindows() && isHeadless());
 
     leftClickOnFirstLine();
     r.press(KeyCode.CONTEXT_MENU);

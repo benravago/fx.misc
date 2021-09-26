@@ -13,8 +13,6 @@ import javafx.util.Duration;
 import fx.react.Subscription;
 import fx.react.Suspendable;
 import fx.react.SuspendableNo;
-import fx.react.state.Tuple3;
-import fx.react.state.Tuples;
 import fx.react.value.SuspendableVal;
 import fx.react.value.Val;
 import fx.react.value.Var;
@@ -25,17 +23,17 @@ class CaretSelectionBinding<PS, SEG, S> implements CaretSelectionBind<PS, SEG, S
 
   // caret
   @Override
-  public Var<CaretVisibility> showCaretProperty() {
+  public Var<Visibility> showCaretProperty() {
     return delegateCaret.showCaretProperty();
   }
 
   @Override
-  public CaretVisibility getShowCaret() {
+  public Visibility getShowCaret() {
     return delegateCaret.getShowCaret();
   }
 
   @Override
-  public void setShowCaret(CaretVisibility value) {
+  public void setShowCaret(Visibility value) {
     delegateCaret.setShowCaret(value);
   }
 
@@ -345,12 +343,8 @@ class CaretSelectionBinding<PS, SEG, S> implements CaretSelectionBind<PS, SEG, S
   }
 
   class BooleanEvent { // See #874
-    public BooleanEvent(boolean b) {
-      value = b;
-    }
-    public boolean get() {
-      return value;
-    }
+    BooleanEvent(boolean b) { value = b; }
+    boolean get() { return value; }
     final boolean value;
   }
 
@@ -376,12 +370,12 @@ class CaretSelectionBinding<PS, SEG, S> implements CaretSelectionBind<PS, SEG, S
     }
 
     var anchorPositions = startedByAnchor.flatMap(
-      b -> b.get() ? Val.constant(Tuples.t(getStartPosition(), getStartParagraphIndex(), getStartColumnPosition()))
-                   : Val.constant(Tuples.t(getEndPosition(), getEndParagraphIndex(), getEndColumnPosition()))
+      b -> b.get() ? Val.constant(new int[]{ getStartPosition(), getStartParagraphIndex(), getStartColumnPosition() })
+                   : Val.constant(new int[]{ getEndPosition(), getEndParagraphIndex(), getEndColumnPosition() })
     );
-    anchorPosition = anchorPositions.map(Tuple3::get1);
-    anchorParIndex = anchorPositions.map(Tuple3::get2);
-    anchorColPosition = anchorPositions.map(Tuple3::get3);
+    anchorPosition = anchorPositions.map(a -> a[0]);
+    anchorParIndex = anchorPositions.map(a -> a[1]);
+    anchorColPosition = anchorPositions.map(a -> a[2]);
 
     var omniSuspendable = Suspendable.combine(
       // first, so it's released last

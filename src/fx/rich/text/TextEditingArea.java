@@ -133,15 +133,15 @@ public interface TextEditingArea<PS, SEG, S> {
   /**
    * Indicates when this text area should display a caret.
    */
-  default Caret.CaretVisibility getShowCaret() {
+  default Caret.Visibility getShowCaret() {
     return getCaretSelectionBind().getShowCaret();
   }
 
-  default void setShowCaret(Caret.CaretVisibility value) {
+  default void setShowCaret(Caret.Visibility value) {
     getCaretSelectionBind().setShowCaret(value);
   }
 
-  default Var<Caret.CaretVisibility> showCaretProperty() {
+  default Var<Caret.Visibility> showCaretProperty() {
     return getCaretSelectionBind().showCaretProperty();
   }
 

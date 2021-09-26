@@ -1,11 +1,11 @@
 package fx.rich.text.model;
 
-import fx.react.state.Tuple2;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import javafx.util.Pair;
 
 /**
  * Helper class via {@link #constructDocument(SegmentOps, Object, Consumer)} or one of its constructors and
@@ -153,14 +153,14 @@ public final class ReadOnlyStyledDocumentBuilder<PS, SEG, S> {
   /**
    * Adds multiple paragraphs to the list, allowing one to specify each paragraph's paragraph style.
    *
-   * @param paragraphArgList each item is a Tuple2 that represents the paragraph style and segment list
+   * @param paragraphArgList each item is a tuple that represents the paragraph style and segment list
    *                         for a single paragraph. If the paragraph style is {@code null},
    *                         the {@link #defaultParagraphStyle} will be used instead.
    * @param entireDocumentStyleSpans style spans for the entire document. It's length should be equal to the length
    *                                 of all the segments' length combined
    */
-  public ReadOnlyStyledDocumentBuilder<PS, SEG, S> addParagraphs0(List<Tuple2<PS, List<SEG>>> paragraphArgList, StyleSpans<S> entireDocumentStyleSpans) {
-    return addParagraphList(paragraphArgList, entireDocumentStyleSpans, Tuple2::get1, Tuple2::get2);
+  public ReadOnlyStyledDocumentBuilder<PS, SEG, S> addParagraphs0(List<Pair<PS, List<SEG>>> paragraphArgList, StyleSpans<S> entireDocumentStyleSpans) {
+    return addParagraphList(paragraphArgList, entireDocumentStyleSpans, Pair::getKey, Pair::getValue);
   }
 
   /**

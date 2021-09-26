@@ -20,7 +20,6 @@ import javafx.util.Duration;
 
 import fx.react.EventStream;
 import fx.react.EventStreams;
-import fx.react.state.StateMachine;
 import fx.react.Subscription;
 import fx.react.Suspendable;
 import fx.react.SuspendableNo;
@@ -29,6 +28,8 @@ import fx.react.value.Val;
 import fx.react.value.Var;
 import fx.rich.text.model.PlainTextChange;
 import fx.rich.text.model.TwoDimensional;
+import fx.state.StateMachine;
+
 import static fx.react.EventStreams.*;
 import static fx.rich.text.model.TwoDimensional.Bias.*;
 
@@ -135,20 +136,20 @@ public class CaretNode extends Path implements Caret, Comparable<CaretNode> {
     return columnPosition;
   }
 
-  final Var<CaretVisibility> showCaret = Var.newSimpleVar(CaretVisibility.AUTO);
+  final Var<Visibility> showCaret = Var.newSimpleVar(Visibility.AUTO);
 
   @Override
-  public final CaretVisibility getShowCaret() {
+  public final Visibility getShowCaret() {
     return showCaret.getValue();
   }
 
   @Override
-  public final void setShowCaret(CaretVisibility value) {
+  public final void setShowCaret(Visibility value) {
     showCaret.setValue(value);
   }
 
   @Override
-  public final Var<CaretVisibility> showCaretProperty() {
+  public final Var<Visibility> showCaretProperty() {
     return showCaret;
   }
 

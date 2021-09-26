@@ -3,7 +3,7 @@ package fx.rich.text.model;
 import java.util.Objects;
 
 /**
- * Essentially, a {@link fx.react.state.Tuple2} of a given style {@link S} that spans a given length.
+ * Essentially, a tuple of a given style {@link S} that spans a given length.
  *
  * @param <S> the style type
  */

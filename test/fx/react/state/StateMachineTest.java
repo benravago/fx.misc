@@ -1,50 +1,38 @@
 package fx.react.state;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import org.junit.jupiter.api.Test;
-
 import fx.react.EventSource;
-import fx.react.EventStream;
-import fx.react.Subscription;
+import fx.state.StateMachine;
+import fx.state.machine.Transmission;
+
+import fx.Counter;
 
 class StateMachineTest {
 
-  private static class Counter {
-    private int count = 0;
-
-    void inc() {
-      ++count;
-    }
-
-    int get() {
-      return count;
-    }
-
-    int getAndReset() {
-      int res = count;
-      count = 0;
-      return res;
-    }
-  }
-
   @Test
   void countDownTest() {
-    EventSource<Void> src1 = new EventSource<Void>();
-    EventSource<Void> src2 = new EventSource<Void>();
-    EventSource<Void> reset = new EventSource<Void>();
+    var src1 = new EventSource<Void>();
+    var src2 = new EventSource<Void>();
+    var reset = new EventSource<Void>();
 
-    BiFunction<Integer, Void, Tuple2<Integer, Optional<String>>> countdown = (s,
-        i) -> s == 1 ? new Tuple2<>(3, Optional.of("COUNTDOWN REACHED")) : new Tuple2<>(s - 1, Optional.empty());
+    var countdown = (BiFunction<Integer, Void, Transmission<Integer, Optional<String>>>)
+      (s, i) -> s == 1 ? new Transmission<>(3, Optional.of("COUNTDOWN REACHED"))
+                       : new Transmission<>(s - 1, Optional.empty());
 
-    EventStream<String> countdowns = StateMachine.init(3).on(src1).transmit(countdown).on(src2).transmit(countdown)
-        .on(reset).transition((s, i) -> 3).toEventStream();
+    var countdowns = StateMachine
+      .init(3)
+      .on(src1).transmit(countdown)
+      .on(src2).transmit(countdown)
+      .on(reset).transition((s, i) -> 3)
+      .toEventStream();
 
-    Counter counter = new Counter();
-    Subscription sub = countdowns.hook(x -> counter.inc()).pin();
+    var counter = new Counter();
+    var sub = countdowns.hook(x -> counter.inc()).pin();
 
     src1.push(null);
     src2.push(null);

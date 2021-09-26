@@ -16,7 +16,7 @@ class BoundsTests extends TestCase {
     r.interact(() -> {
       stage().setHeight(50);
       // insure caret is always visible
-      area.setShowCaret(Caret.CaretVisibility.ON);
+      area.setShowCaret(Caret.Visibility.ON);
       area.replaceText(MANY_PARS_OF_TEXT);
       area.moveTo(0);
       area.showParagraphAtTop(0);

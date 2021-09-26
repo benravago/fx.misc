@@ -1,15 +1,12 @@
 package fx.rich.text.keyboard.navigation;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static javafx.scene.input.KeyCode.*;
-
-//import org.junit.jupiter.api.Rule;
-//import org.junit.jupiter.api.rules.Timeout;
 
 import fx.text.junit.TestCase;
 
@@ -29,8 +26,10 @@ class MultiLineJaggedTextTests extends TestCase {
     });
   }
 
-  @Test @Disabled
+  @Test
   void pressing_down_moves_caret_to_next_line() {
+    assumeTrue(isHeadless());
+
     area.moveTo(0);
     assertEquals(0, area.getCaretSelectionBind().getLineIndex().getAsInt());
 
@@ -39,8 +38,10 @@ class MultiLineJaggedTextTests extends TestCase {
     assertEquals(1, area.getCaretSelectionBind().getLineIndex().getAsInt());
   }
 
-  @Test @Disabled
+  @Test
   void pressing_up_moves_caret_to_previous_line() {
+    assumeTrue(isHeadless());
+
     area.moveTo(area.getLength());
     var lastLineIndex = area.getParagraphLinesCount(0) - 1;
     assertEquals(lastLineIndex, area.getCaretSelectionBind().getLineIndex().getAsInt());

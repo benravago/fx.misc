@@ -136,7 +136,11 @@ public class FxRobot {
     return this;
   }
 
-  public FxRobot type(KeyCode[] keys, Runnable action) {
+  public FxRobot chord(KeyCode... keys) {
+    return chord(keys, ()->{});
+  }
+
+  public FxRobot chord(KeyCode[] keys, Runnable action) {
     interact(() -> keySequence(keys,action) );
     return this;
   }
@@ -172,17 +176,17 @@ public class FxRobot {
   }
 
   void keySequence(KeyCode[] keys, Runnable action) {
-    var q = new ArrayDeque<KeyCode>();
+    var i = 0;
     try {
-      for (var key:keys) {
-        robot.keyPress(key);
-        q.push(key);
+      while (i < keys.length) {
+        robot.keyPress(keys[i]);
+        i++;
       }
       action.run();
     }
     finally {
-      while (!q.isEmpty()) {
-        robot.keyRelease(q.pop());
+      while (i-- > 0) {
+        robot.keyRelease(keys[i]);
       }
     }
   }
@@ -304,3 +308,30 @@ public class FxRobot {
   }
 
 }
+/*
+
+==  void  keyPress(KeyCode keyCode)
+==  void  keyRelease(KeyCode keyCode)
+==  void  keyType(KeyCode keyCode)
+
+==  void  mouseMove(double x, double y)
+==  void  mouseMove(Point2D location)
+
+==  void  mouseClick(MouseButton... buttons)
+==  void  mousePress(MouseButton... buttons)
+==  void  mouseRelease(MouseButton... buttons)
+==  void  mouseWheel(int wheelAmt)
+
+    Point2D getMousePosition()
+    double  getMouseX()
+    double  getMouseY()
+
+    Color   getPixelColor(double x, double y)
+    Color   getPixelColor(Point2D location)
+
+    WritableImage   getScreenCapture(WritableImage image, double x, double y, double width, double height)
+    WritableImage   getScreenCapture(WritableImage image, double x, double y, double width, double height, boolean scaleToFit)
+    WritableImage   getScreenCapture(WritableImage image, Rectangle2D region)
+    WritableImage   getScreenCapture(WritableImage image, Rectangle2D region, boolean scaleToFit)
+
+*/

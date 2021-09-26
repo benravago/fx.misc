@@ -8,8 +8,6 @@ import java.util.Objects;
 
 import javafx.scene.control.IndexRange;
 
-import fx.react.state.Tuple2;
-import fx.react.state.Tuples;
 import static fx.rich.text.model.TwoDimensional.Bias.*;
 
 /**
@@ -41,7 +39,9 @@ import static fx.rich.text.model.TwoDimensional.Bias.*;
  */
 public final class Paragraph<PS, SEG, S> {
 
-  static <SEG, S> Tuple2<List<SEG>, StyleSpans<S>> decompose(List<StyledSegment<SEG, S>> list, SegmentOps<SEG, S> segmentOps) {
+  record Decompose<A,B>(A segments, B styles) {}
+
+  static <SEG, S> Decompose<List<SEG>, StyleSpans<S>> decompose(List<StyledSegment<SEG, S>> list, SegmentOps<SEG, S> segmentOps) {
     var segs = new ArrayList<SEG>();
     var builder = new StyleSpansBuilder<S>();
     for (var styledSegment : list) {
@@ -61,7 +61,7 @@ public final class Paragraph<PS, SEG, S> {
       // builder merges styles shared between consecutive different segments
       builder.add(styledSegment.getStyle(), segmentOps.length(styledSegment.getSegment()));
     }
-    return Tuples.t(segs, builder.create());
+    return new Decompose<>(segs, builder.create());
   }
 
 //@SafeVarargs
@@ -90,8 +90,8 @@ public final class Paragraph<PS, SEG, S> {
     this(paragraphStyle, segmentOps, decompose(styledSegments, segmentOps));
   }
 
-  private Paragraph(PS paragraphStyle, SegmentOps<SEG, S> segmentOps, Tuple2<List<SEG>, StyleSpans<S>> decomposedList) {
-    this(paragraphStyle, segmentOps, decomposedList._1, decomposedList._2);
+  private Paragraph(PS paragraphStyle, SegmentOps<SEG, S> segmentOps, Decompose<List<SEG>, StyleSpans<S>> decomposedList) {
+    this(paragraphStyle, segmentOps, decomposedList.segments, decomposedList.styles);
   }
 
   /**
@@ -131,7 +131,7 @@ public final class Paragraph<PS, SEG, S> {
   /**
    * Since the segments and styles in a paragraph are stored separate from another, combines these two collections
    * into a single collection where each segment and its corresponding style are grouped into the same object.
-   * Essentially, returns {@code List<Tuple2<Segment, Style>>}.
+   * Essentially, returns {@code List< tuple of <Segment, Style>>}.
    */
   public List<StyledSegment<SEG, S>> getStyledSegments() {
     if (styledSegments == null) {

@@ -21,12 +21,12 @@ import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextFlow;
-import fx.react.state.Tuple2; // TODO: convert to javafx.util.Pair
+import javafx.util.Pair;
 
 import fx.react.EventStream;
-import fx.util.Either;
 import fx.react.value.Val;
 import fx.react.value.Var;
+import fx.util.Either;
 import fx.rich.text.event.MouseStationaryHelper;
 import fx.rich.text.model.Paragraph;
 import fx.rich.text.model.StyledSegment;
@@ -48,12 +48,7 @@ class ParagraphBox<PS, SEG, S> extends Region {
    * Although it is just a wrapper around double, its purpose is to increase
    * type safety.
    */
-  public static class CaretOffsetX { // TODO: make into a record
-    final double value;
-    CaretOffsetX(double value) {
-      this.value = value;
-    }
-  }
+  public record CaretOffsetX(double value) {}
 
   final ParagraphText<PS, SEG, S> text;
 
@@ -151,13 +146,17 @@ class ParagraphBox<PS, SEG, S> extends Region {
     return (graphic.isPresent()) ? graphic.getValue() : null;
   }
 
-  public EventStream<Either<Tuple2<Point2D, Integer>, Object>> stationaryIndices(Duration delay) {
+  public EventStream<Either<Pair<Point2D, Integer>, Object>> stationaryIndices(Duration delay) {
     var stationaryEvents = new MouseStationaryHelper(this).events(delay);
-    var hits = stationaryEvents.filterMap(Either::asLeft).filterMap(p -> {
-      var charIdx = hit(p).getCharacterIndex();
-      return charIdx.isPresent() ? Optional.of(new Tuple2<>(p, charIdx.getAsInt())) : Optional.empty();
-    });
-    var stops = stationaryEvents.filter(Either::isRight).map(Either::getRight);
+    var hits = stationaryEvents
+      .filterMap(Either::asLeft)
+      .filterMap(p -> {
+        var charIdx = hit(p).getCharacterIndex();
+        return charIdx.isPresent() ? Optional.of(new Pair<>(p, charIdx.getAsInt())) : Optional.empty();
+       });
+    var stops = stationaryEvents
+      .filter(Either::isRight)
+      .map(Either::getRight);
     return hits.or(stops);
   }
 

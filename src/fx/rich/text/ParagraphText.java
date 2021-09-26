@@ -1,15 +1,9 @@
 package fx.rich.text;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,11 +27,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
-import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.shape.StrokeType;
 
-import fx.react.state.Tuple2;
-import fx.react.state.Tuples;
 import fx.react.value.Val;
 import fx.rich.text.model.Paragraph;
 import fx.rich.text.model.StyledSegment;
@@ -182,8 +172,8 @@ class ParagraphText<PS, SEG, S> extends TextFlowExt {
       createBackgroundShape,
       (backgroundShape, tuple) -> {
         backgroundShape.setStrokeWidth(0);
-        backgroundShape.setFill(tuple._1);
-        backgroundShape.getElements().setAll(getRangeShape(tuple._2));
+        backgroundShape.setFill(tuple.value());
+        backgroundShape.getElements().setAll(getRangeShape(tuple.index()));
       },
       addToBackgroundAndIncrementSelectionIndex,
       clearUnusedShapes
@@ -191,7 +181,7 @@ class ParagraphText<PS, SEG, S> extends TextFlowExt {
     borderShapeHelper = new CustomCssShapeHelper<>(
       createBorderShape,
       (borderShape, tuple) -> {
-        var attributes = tuple._1;
+        var attributes = tuple.value();
         borderShape.setStrokeWidth(attributes.width);
         borderShape.setStroke(attributes.color);
         if (attributes.type != null) {
@@ -200,7 +190,7 @@ class ParagraphText<PS, SEG, S> extends TextFlowExt {
         if (attributes.dashArray != null) {
           borderShape.getStrokeDashArray().setAll(attributes.dashArray);
         }
-        borderShape.getElements().setAll(getRangeShape(tuple._2));
+        borderShape.getElements().setAll(getRangeShape(tuple.index()));
       },
       addToBackground,
       clearUnusedShapes
@@ -208,14 +198,14 @@ class ParagraphText<PS, SEG, S> extends TextFlowExt {
     underlineShapeHelper = new CustomCssShapeHelper<>(
       createUnderlineShape,
       (underlineShape, tuple) -> {
-        var attributes = tuple._1;
+        var attributes = tuple.value();
         underlineShape.setStroke(attributes.color);
         underlineShape.setStrokeWidth(attributes.width);
         underlineShape.setStrokeLineCap(attributes.cap);
         if (attributes.dashArray != null) {
           underlineShape.getStrokeDashArray().setAll(attributes.dashArray);
         }
-        underlineShape.getElements().setAll(getUnderlineShape(tuple._2));
+        underlineShape.getElements().setAll(getUnderlineShape(tuple.index()));
       },
       addToForeground,
       clearUnusedShapes
@@ -480,193 +470,6 @@ class ParagraphText<PS, SEG, S> extends TextFlowExt {
     updateAllCaretShapes();
     updateAllSelectionShapes();
     updateBackgroundShapes();
-  }
-
-  static class CustomCssShapeHelper<T> {
-
-    final List<Tuple2<T, IndexRange>> ranges = new LinkedList<>();
-    final List<Path> shapes = new LinkedList<>();
-
-    final Supplier<Path> createShape;
-    final BiConsumer<Path, Tuple2<T, IndexRange>> configureShape;
-    final Consumer<Path> addToChildren;
-    final Consumer<Collection<Path>> clearUnusedShapes;
-
-    CustomCssShapeHelper(Supplier<Path> createShape, BiConsumer<Path, Tuple2<T, IndexRange>> configureShape, Consumer<Path> addToChildren, Consumer<Collection<Path>> clearUnusedShapes) {
-      this.createShape = createShape;
-      this.configureShape = configureShape;
-      this.addToChildren = addToChildren;
-      this.clearUnusedShapes = clearUnusedShapes;
-    }
-
-    /**
-     * Calculates the range of a value (background color, underline, etc.) that is shared between multiple
-     * consecutive {@link TextExt} nodes
-     */
-    void updateSharedShapeRange(T value, int start, int end, BiFunction<T, T, Boolean> equals) {
-      Runnable addNewValueRange = () -> ranges.add(Tuples.t(value, new IndexRange(start, end)));
-
-      if (ranges.isEmpty()) {
-        addNewValueRange.run();
-      } else {
-        var lastIndex = ranges.size() - 1;
-        var lastShapeValueRange = ranges.get(lastIndex);
-        var lastShapeValue = lastShapeValueRange._1;
-
-        // calculate smallest possible position which is consecutive to the given start position
-        var prevEndNext = lastShapeValueRange.get2().getEnd();
-        if (start == prevEndNext && // Consecutive?
-            equals.apply(lastShapeValue, value)) // Same style?
-        {
-          var lastRange = lastShapeValueRange._2;
-          var extendedRange = new IndexRange(lastRange.getStart(), end);
-          ranges.set(lastIndex, Tuples.t(lastShapeValue, extendedRange));
-        } else {
-          addNewValueRange.run();
-        }
-      }
-    }
-
-    /**
-     * Updates the shapes calculated in {@link #updateSharedShapeRange(Object, int, int, BiFunction)} and
-     * configures them via {@code configureShape}.
-     */
-    void updateSharedShapes() {
-      // remove or add shapes, depending on what's needed
-      var neededNumber = ranges.size();
-      var availableNumber = shapes.size();
-
-      if (neededNumber < availableNumber) {
-        var unusedShapes = shapes.subList(neededNumber, availableNumber);
-        clearUnusedShapes.accept(unusedShapes);
-        unusedShapes.clear();
-      } else if (availableNumber < neededNumber) {
-        for (var i = 0; i < neededNumber - availableNumber; i++) {
-          var shape = createShape.get();
-          shapes.add(shape);
-          addToChildren.accept(shape);
-        }
-      }
-
-      // update the shape's color and elements
-      for (var i = 0; i < ranges.size(); i++) {
-        configureShape.accept(shapes.get(i), ranges.get(i));
-      }
-
-      // clear, since it's no longer needed
-      ranges.clear();
-    }
-  }
-
-  static class BorderAttributes extends LineAttributesBase {
-
-    final StrokeType type;
-
-    BorderAttributes(TextExt text) {
-      super(text.getBorderStrokeColor(), text.getBorderStrokeWidth(), text.borderStrokeDashArrayProperty());
-      type = text.getBorderStrokeType();
-    }
-    /**
-     * Same as {@link #equals(Object)} but no need to check the object for its class
-     */
-    public boolean equalsFaster(BorderAttributes attr) {
-      return super.equalsFaster(attr) && Objects.equals(type, attr.type);
-    }
-    @Override
-    public boolean equals(Object obj) {
-      return (obj instanceof BorderAttributes attributes) ? equalsFaster(attributes) : false;
-    }
-    @Override
-    public String toString() {
-      return String.format("BorderAttributes[type=%s %s]", type, getSubString());
-    }
-  }
-
-  static class UnderlineAttributes extends LineAttributesBase {
-
-    final StrokeLineCap cap;
-
-    UnderlineAttributes(TextExt text) {
-      super(text.getUnderlineColor(), text.getUnderlineWidth(), text.underlineDashArrayProperty());
-      cap = text.getUnderlineCap();
-    }
-
-    /**
-     * Same as {@link #equals(Object)} but no need to check the object for its class
-     */
-    public boolean equalsFaster(UnderlineAttributes attr) {
-      return super.equalsFaster(attr) && Objects.equals(cap, attr.cap);
-    }
-    @Override
-    public boolean equals(Object obj) {
-      return (obj instanceof UnderlineAttributes attr) ? equalsFaster(attr) : false;
-    }
-    @Override
-    public String toString() {
-      return String.format("UnderlineAttributes[cap=%s %s]", cap, getSubString());
-    }
-  }
-
-  static class LineAttributesBase {
-
-    final double width;
-    final Paint color;
-    final Double[] dashArray;
-
-    public final boolean isNullValue() {
-      return color == null || width == -1;
-    }
-
-    /**
-     * Java Quirk! Using {@code t.get[border/underline]DashArray()} throws a ClassCastException
-     * "Double cannot be cast to Number". However, using {@code t.getDashArrayProperty().get()}
-     * works without issue
-     */
-    LineAttributesBase(Paint color, Number width, ObjectProperty<Number[]> dashArrayProp) {
-      this.color = color;
-      if (color == null || width == null || width.doubleValue() <= 0) {
-        // null value
-        this.width = -1;
-        dashArray = null;
-      } else {
-        // real value
-        this.width = width.doubleValue();
-
-        // get the dash array - JavaFX CSS parser seems to return either a Number[] array
-        // or a single value, depending on whether only one or more than one value has been
-        // specified in the CSS
-        Object dashArrayProperty = dashArrayProp.get();
-        if (dashArrayProperty != null) {
-          if (dashArrayProperty.getClass().isArray()) {
-            var numberArray = (Number[]) dashArrayProperty;
-            dashArray = new Double[numberArray.length];
-            int idx = 0;
-            for (var d : numberArray) {
-              dashArray[idx++] = (Double) d;
-            }
-          } else {
-            dashArray = new Double[1];
-            dashArray[0] = ((Double) dashArrayProperty).doubleValue();
-          }
-        } else {
-          dashArray = null;
-        }
-      }
-    }
-
-    /**
-     * Same as {@link #equals(Object)} but no need to check the object for its class
-     */
-    public boolean equalsFaster(LineAttributesBase attr) {
-      return Objects.equals(width, attr.width) && Objects.equals(color, attr.color) && Arrays.equals(dashArray, attr.dashArray);
-    }
-    @Override
-    public boolean equals(Object obj) {
-      return (obj instanceof LineAttributesBase attr) ? equalsFaster(attr) : false;
-    }
-    protected final String getSubString() {
-      return String.format("width=%s color=%s dashArray=%s", width, color, Arrays.toString(dashArray));
-    }
   }
 
 }

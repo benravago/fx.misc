@@ -12,20 +12,14 @@ import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import fx.react.util.Lists;
 import fx.react.collection.MaterializedModification;
-import fx.util.tree.Index;
 import fx.util.Either;
+import static fx.util.Either.*;
+import fx.util.tree.Index;
 import fx.util.tree.FingerTree;
 import fx.util.tree.NonEmpty;
-import fx.react.util.Lists;
 import fx.util.tree.ToSemigroup;
-import static fx.util.Either.*;
-
-import fx.react.state.Tuple2;
-import fx.react.state.Tuple3;
-import fx.react.state.Tuples;
-import static fx.react.state.Tuples.*;
-
 
 /**
  * An immutable implementation of {@link StyledDocument} that does not allow editing. For a {@link StyledDocument}
@@ -251,17 +245,23 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
     return position(0, 0).offsetBy(offset, bias);
   }
 
+  public record Split<A,B>(A left, B right) {
+    public <T> T map(BiFunction<? super A, ? super B, ? extends T> f) {
+      return f.apply(left,right);
+    }
+  }
+
   /**
    * Splits this document into two at the given position and returns both halves.
    */
-  public Tuple2<ReadOnlyStyledDocument<PS, SEG, S>, ReadOnlyStyledDocument<PS, SEG, S>> split(int position) {
+  public Split<ReadOnlyStyledDocument<PS, SEG, S>, ReadOnlyStyledDocument<PS, SEG, S>> split(int position) {
     return tree.locate(NAVIGATE, position).map(this::split);
   }
 
   /**
    * Splits this document into two at the given paragraph's column position and returns both halves.
    */
-  public Tuple2<ReadOnlyStyledDocument<PS, SEG, S>, ReadOnlyStyledDocument<PS, SEG, S>> split(int paragraphIndex, int columnPosition) {
+  public Split<ReadOnlyStyledDocument<PS, SEG, S>, ReadOnlyStyledDocument<PS, SEG, S>> split(int paragraphIndex, int columnPosition) {
     return tree
       .splitAt(paragraphIndex)
       .map((l, p, r) -> {
@@ -269,7 +269,7 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
         var p2 = p.subSequence(columnPosition);
         var doc1 = new ReadOnlyStyledDocument<>(l.append(p1));
         var doc2 = new ReadOnlyStyledDocument<>(r.prepend(p2));
-        return t(doc1, doc2);
+        return new Split<>(doc1, doc2);
       }
     );
   }
@@ -297,7 +297,7 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
 
   @Override
   public StyledDocument<PS, SEG, S> subSequence(int start, int end) {
-    return split(end)._1.split(start)._2;
+    return split(end).left.split(start).right;
   }
 
   /**
@@ -315,25 +315,31 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
    *     </li>
    * </ol>
    */
-  public Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, List<RichTextChange<PS, SEG, S>>, List<MaterializedModification<Paragraph<PS, SEG, S>>>> replaceMulti(List<Replacement<PS, SEG, S>> replacements) {
+  public Replace<ReadOnlyStyledDocument<PS, SEG, S>, List<RichTextChange<PS, SEG, S>>, List<MaterializedModification<Paragraph<PS, SEG, S>>>> replaceMulti(List<Replacement<PS, SEG, S>> replacements) {
     var updatedDoc = this;
     var richChangeList = new ArrayList<RichTextChange<PS, SEG, S>>(replacements.size());
     var parChangeList = new ArrayList<MaterializedModification<Paragraph<PS, SEG, S>>>(replacements.size());
     for (var r : replacements) {
-      // Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>>
       var postReplacement = updatedDoc.replace(r);
-      updatedDoc = postReplacement.get1();
-      richChangeList.add(postReplacement.get2());
-      parChangeList.add(postReplacement.get3());
+      updatedDoc = postReplacement.updated();
+      richChangeList.add(postReplacement.changes());
+      parChangeList.add(postReplacement.parChanges());
     }
-    return Tuples.t(updatedDoc, richChangeList, parChangeList);
+    return new Replace<>(updatedDoc, richChangeList, parChangeList);
+  }
+
+  public record Replace<A,B,C>(A updated, B changes, C parChanges) {
+    interface F<A, B, C> { void accept(A a, B b, C c); }
+    public void exec(F<? super A, ? super B, ? super C> f) {
+      f.accept(updated, changes, parChanges);
+    }
   }
 
   /**
    * Convenience method for calling {@link #replace(int, int, ReadOnlyStyledDocument)} with a {@link Replacement}
    * argument.
    */
-  public Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(Replacement<PS, SEG, S> replacement) {
+  public Replace<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(Replacement<PS, SEG, S> replacement) {
     return replace(replacement.getStart(), replacement.getEnd(), replacement.getDocument());
   }
 
@@ -351,7 +357,7 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
    *     </li>
    * </ol>
    */
-  public Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(int from, int to, ReadOnlyStyledDocument<PS, SEG, S> replacement) {
+  public Replace<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(int from, int to, ReadOnlyStyledDocument<PS, SEG, S> replacement) {
     return replace(from, to, x -> replacement);
   }
 
@@ -370,20 +376,20 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
    *     </li>
    * </ol>
    */
-  public Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(int from, int to, UnaryOperator<ReadOnlyStyledDocument<PS, SEG, S>> mapper) {
+  public Replace<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(int from, int to, UnaryOperator<ReadOnlyStyledDocument<PS, SEG, S>> mapper) {
     ensureValidRange(from, to);
     var start = tree.locate(NAVIGATE, from);
     var end = tree.locate(NAVIGATE, to);
     return replace(start, end, mapper);
   }
 
-  public Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(int paragraphIndex, int fromCol, int toCol, UnaryOperator<ReadOnlyStyledDocument<PS, SEG, S>> f) {
+  public Replace<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(int paragraphIndex, int fromCol, int toCol, UnaryOperator<ReadOnlyStyledDocument<PS, SEG, S>> f) {
     ensureValidParagraphRange(paragraphIndex, fromCol, toCol);
     return replace(new Index(paragraphIndex, fromCol), new Index(paragraphIndex, toCol), f);
   }
 
   // Note: there must be a "ensureValid_()" call preceding the call of this method
-  private Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(Index start, Index end, UnaryOperator<ReadOnlyStyledDocument<PS, SEG, S>> f) {
+  Replace<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replace(Index start, Index end, UnaryOperator<ReadOnlyStyledDocument<PS, SEG, S>> f) {
     var pos = tree.getSummaryBetween(0, start.major).map(s -> s.length() + 1).orElse(0) + start.minor;
     var removedPars = getParagraphs().subList(start.major, end.major + 1);
     return end.map(this::split).map((l0, r) -> {
@@ -394,7 +400,7 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
         var change = new RichTextChange<PS, SEG, S>(pos, removed, doc.subSequence(pos, pos + replacement.length()));
         var addedPars = doc.getParagraphs().subList(start.major, start.major + replacement.getParagraphCount());
         var parChange = MaterializedModification.create(start.major, removedPars, addedPars);
-        return t(doc, change, parChange);
+        return new Replace<>(doc, change, parChange);
       });
     });
   }
@@ -413,7 +419,7 @@ public final class ReadOnlyStyledDocument<PS, SEG, S> implements StyledDocument<
    *     </li>
    * </ol>
    */
-  public Tuple3<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replaceParagraph(int parIdx, UnaryOperator<Paragraph<PS, SEG, S>> mapper) {
+  public Replace<ReadOnlyStyledDocument<PS, SEG, S>, RichTextChange<PS, SEG, S>, MaterializedModification<Paragraph<PS, SEG, S>>> replaceParagraph(int parIdx, UnaryOperator<Paragraph<PS, SEG, S>> mapper) {
     ensureValidParagraphIndex(parIdx);
     return replace(new Index(parIdx, 0), new Index(parIdx, tree.getLeaf(parIdx).length()), doc -> doc.mapParagraphs(mapper));
   }

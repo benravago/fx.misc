@@ -14,8 +14,8 @@ import java.util.function.BiFunction;
  */
 public class StyleSpansBuilder<S> {
 
-  static class StyleSpansImpl<S> extends StyleSpansBase<S> {
-    StyleSpansImpl(List<StyleSpan<S>> spans) {
+  static class Styled<S> extends StyleSpansBase<S> {
+    Styled(List<StyleSpan<S>> spans) {
       this.spans = spans;
     }
 
@@ -139,7 +139,7 @@ public class StyleSpansBuilder<S> {
     }
 
     created = true;
-    return new StyleSpansImpl<>(Collections.unmodifiableList(spans));
+    return new Styled<>(Collections.unmodifiableList(spans));
   }
 
   void addSpan(StyleSpan<S> span) {

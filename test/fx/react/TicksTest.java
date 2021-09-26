@@ -63,7 +63,7 @@ class TicksTest {
     assertEquals(4, nTicks.get().intValue());
   }
 
-  @Test
+  @Test // NOTE: timing dependent
   void fxRestartableTicksTest() throws InterruptedException, ExecutionException {
     var nTicks = new CompletableFuture<Integer>();
     Platform.runLater(() -> {
@@ -86,7 +86,7 @@ class TicksTest {
     assertEquals(2, nTicks.get().intValue());
   }
 
-  @Test
+  @Test // NOTE: timing dependent
   void fxRestartableTicks0Test() throws InterruptedException, ExecutionException {
     var nTicks = new CompletableFuture<Integer>();
     Platform.runLater(() -> {

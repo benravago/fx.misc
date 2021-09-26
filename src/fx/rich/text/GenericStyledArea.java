@@ -1761,7 +1761,7 @@ public class GenericStyledArea<PS, SEG, S> extends Region implements TextEditing
     UnaryOperator<Paragraph<PS, SEG, S>> mapper = p -> p.setParagraphStyle(styleMixin.apply(p.getParagraphStyle()));
 
     for (var p = 1; p < subDoc.getParagraphCount(); p++) {
-      subDoc = subDoc.replaceParagraph(p, mapper).get1();
+      subDoc = subDoc.replaceParagraph(p, mapper).updated();
     }
 
     replace(startPos, endPos, subDoc);
@@ -1832,7 +1832,7 @@ public class GenericStyledArea<PS, SEG, S> extends Region implements TextEditing
       UnaryOperator<Paragraph<PS, SEG, S>> mapper = p -> p.setParagraphStyle(styleMixin.apply(p.getParagraphStyle()));
 
       for (var p = 1; p < subDoc.getParagraphCount(); p++) {
-        subDoc = subDoc.replaceParagraph(p, mapper).get1();
+        subDoc = subDoc.replaceParagraph(p, mapper).updated();
       }
 
       replace(startPos, endPos, subDoc);
@@ -2215,11 +2215,11 @@ public class GenericStyledArea<PS, SEG, S> extends Region implements TextEditing
   EventStream<MouseOverTextEvent> mouseOverTextEvents(ObservableSet<ParagraphBox<PS, SEG, S>> cells, Duration delay) {
     return merge(cells, c -> c
       .stationaryIndices(delay)
-      .map(e -> e.unify(
-         l -> l.map((pos, charIdx) -> MouseOverTextEvent.beginAt(c.localToScreen(pos), getParagraphOffset(c.getIndex()) + charIdx)),
+      .map(e -> e.unify( // Pair<pos,charIdx>
+         l -> MouseOverTextEvent.beginAt(c.localToScreen(l.getKey()), getParagraphOffset(c.getIndex()) + l.getValue()),
          r -> MouseOverTextEvent.end()
        ))
-    );
+     );
   }
 
   int getParagraphOffset(int parIdx) {

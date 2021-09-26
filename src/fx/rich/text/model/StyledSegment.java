@@ -3,7 +3,7 @@ package fx.rich.text.model;
 import java.util.Objects;
 
 /**
- * Essentially, an immutable {@link fx.react.state.Tuple2} that combines a {@link SEG segment} object and a
+ * Essentially, an immutable tuple that combines a {@link SEG segment} object and a
  * {@link S style} object together.
  *
  * @param <SEG> the segment type

@@ -3,11 +3,11 @@ package fx.rich.text.model;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
+import javafx.util.Pair;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import fx.react.state.Tuple2;
 
 class ReadOnlyStyledDocumentBuilderTest {
 
@@ -119,7 +119,7 @@ class ReadOnlyStyledDocumentBuilderTest {
     var textStyle = "seg style";
 
     var singletonList = Collections.singletonList(
-      new Tuple2<>(paragraphStyle, Collections.singletonList(text))
+      new Pair<>(paragraphStyle, Collections.singletonList(text))
     );
     var spans = StyleSpans.singleton(textStyle, text.length());
 

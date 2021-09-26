@@ -40,7 +40,7 @@ public interface Caret {
    * {@link #AUTO} while those who want a more custom configuration should make a caret's {@code CaretVisibility}
    * value oscillate between {@link #ON} and {@link #OFF}.
    */
-  public static enum CaretVisibility {
+  public static enum Visibility {
     /** Caret is displayed. */
     ON,
     /** Caret is displayed when area is focused, enabled, and editable. */
@@ -81,13 +81,13 @@ public interface Caret {
 
   /**
    * Whether to display the caret or not. Default value is
-   * {@link CaretVisibility#AUTO}.
+   * {@link Visibility#AUTO}.
    */
-  public Var<CaretVisibility> showCaretProperty();
+  public Var<Visibility> showCaretProperty();
 
-  public CaretVisibility getShowCaret();
+  public Visibility getShowCaret();
 
-  public void setShowCaret(CaretVisibility value);
+  public void setShowCaret(Visibility value);
 
   /** Whether the caret is being shown in the viewport */
   public ObservableValue<Boolean> visibleProperty();
